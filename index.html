@@ -1275,6 +1275,7 @@ function cutscene(title, body, koBody, ms, then) {
   setTimeout(() => { G.cine = false; cinema(true, false); if (then) then() }, ms)
 }
 function mechanic(title, body, koBody) {
+  if (G.cine) return                        // a cutscene owns the screen; no small cards over it
   const c = $('#callout')
   c.querySelector('b').textContent = title
   c.querySelector('span').textContent = ko() ? (koBody || KO.mech[title] || body) : body
@@ -1555,11 +1556,21 @@ function die() {
   // BALANCE SHEET — the bar you were emptying was never the real one
   if (G.boss.id === 'altruist' && !G.books) {
     G.books = true
-    G.hp = Math.round(G.max * .45)
-    $('#hpbar').classList.add('books')
-    banner('OFF THE BOOKS', '#c9a4ff'); Sound.play('shield'); flash(); shake('l')
-    mechanic('BALANCE SHEET', 'The books were fake! That bar was never his real health — this purple one is.'); signature(1)
-    talk(true); paintHp(); paintDamageStage()
+    G.hp = 0; paintHp(); paintDamageStage()      // he reads as finished: stars, dizzy eyes
+    Sound.play('ko'); shake('l'); flash()
+    whip(Math.random() < .5 ? 1 : -1, 900)       // sags like the fight is over
+    cutscene('BALANCE SHEET',
+      'You emptied the bar and he is still standing. That number was never his health.',
+      '체력바를 다 비웠는데 아직 서 있다. 그 숫자는 애초에 그의 체력이 아니었다.',
+      2500)
+    setTimeout(() => {                           // the reveal, mid-scene
+      if (G.over || !G.boss || G.boss.id !== 'altruist') return
+      $('#hpbar').classList.add('books')
+      G.hp = Math.round(G.max * .45)
+      paintHp(); paintDamageStage()
+      banner('OFF THE BOOKS', '#c9a4ff'); Sound.play('shield'); flash(); shake('m')
+      signature(1)
+    }, 1400)
     return
   }
   G.over = true
