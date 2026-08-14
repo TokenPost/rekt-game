@@ -437,6 +437,72 @@ header{position:relative;z-index:5;display:flex;align-items:center;gap:9px;paddi
 .shake-s{animation:shk .16s}.shake-m{animation:shk .26s}.shake-l{animation:shk .42s}
 @keyframes shk{0%,100%{transform:translate(0,0)}20%{transform:translate(-9px,6px)}40%{transform:translate(8px,-7px)}60%{transform:translate(-7px,-4px)}80%{transform:translate(6px,6px)}}
 
+
+/* ================= AIMED WEAPON =================
+   The selected weapon rides the pointer and tilts so its business end faces the boss.
+   Drawn, not emoji, so it reads as a real object; one outline via the drop-shadow
+   union trick. Never accepts pointer events. */
+#aim{position:absolute;left:0;top:0;z-index:6;pointer-events:none;opacity:0;
+  transition:opacity .12s;will-change:transform}
+#aim.on{opacity:1}
+.wpn{position:absolute;left:0;top:0;transform:translate(-50%,-50%);
+  filter:drop-shadow(3px 0 0 #241a4d) drop-shadow(-3px 0 0 #241a4d)
+         drop-shadow(0 3px 0 #241a4d) drop-shadow(0 -3px 0 #241a4d)
+         drop-shadow(0 8px 6px #0000003d)}
+#aim.hit .wpn{animation:wswing .22s cubic-bezier(.3,1.5,.5,1)}
+@keyframes wswing{45%{transform:translate(-50%,-10%) scale(1.14)}}
+.wpn i{position:absolute}
+
+/* red candle: an actual candlestick, wick and all */
+.w-candle{width:34px;height:96px}
+.w-candle i:nth-child(1){left:15px;top:0;width:4px;height:96px;background:#8e1c2c}
+.w-candle i:nth-child(2){left:0;top:20px;width:34px;height:58px;border-radius:4px;
+  background:linear-gradient(100deg,#ff7d7d,#e01e2f 45%,#a2101f)}
+/* bat: tapered barrel with a grip */
+.w-bat{width:26px;height:104px}
+.w-bat i:nth-child(1){left:4px;top:0;width:18px;height:34px;border-radius:8px;
+  background:linear-gradient(#5a3a1c,#3a2410)}
+.w-bat i:nth-child(2){left:0;top:28px;width:26px;height:76px;border-radius:10px 10px 14px 14px;
+  background:linear-gradient(100deg,#f0d9a8,#c99a52 50%,#8d6524)}
+/* hammer: handle plus a heavy head */
+.w-hammer{width:70px;height:104px}
+.w-hammer i:nth-child(1){left:27px;top:22px;width:16px;height:82px;border-radius:7px;
+  background:linear-gradient(#7a5228,#48300f)}
+.w-hammer i:nth-child(2){left:0;top:0;width:70px;height:38px;border-radius:8px;
+  background:linear-gradient(160deg,#c7cede,#7d879e 55%,#4d5468)}
+/* doge missile: a snarling shiba, not a dog emoji */
+.w-doge{width:78px;height:78px}
+.w-doge i:nth-child(1),.w-doge i:nth-child(2){top:-2px;width:26px;height:32px;
+  border-radius:52% 52% 12% 12%;background:#c98f43}
+.w-doge i:nth-child(1){left:2px;transform:rotate(-16deg)}
+.w-doge i:nth-child(2){right:2px;transform:rotate(16deg)}
+.w-doge i:nth-child(3){left:3px;top:10px;width:72px;height:66px;border-radius:48% 48% 44% 44%;
+  background:radial-gradient(circle at 36% 30%,#f4d79a,#dcae61)}
+.w-doge i:nth-child(4),.w-doge i:nth-child(5){top:28px;width:20px;height:7px;
+  border-radius:4px;background:#8a5c22}
+.w-doge i:nth-child(4){left:11px;transform:rotate(22deg)}
+.w-doge i:nth-child(5){right:11px;transform:rotate(-22deg)}
+.w-doge i:nth-child(6),.w-doge i:nth-child(7){top:36px;width:12px;height:12px;
+  border-radius:50%;background:#2a1c10}
+.w-doge i:nth-child(6){left:16px}.w-doge i:nth-child(7){right:16px}
+.w-doge i:nth-child(8){left:50%;top:48px;width:38px;height:26px;margin-left:-19px;
+  border-radius:44% 44% 50% 50%;background:#fdf1d6}
+.w-doge i:nth-child(9){left:50%;top:50px;width:16px;height:11px;margin-left:-8px;
+  border-radius:48%;background:#241a4d}
+/* the growl: a dark open mouth so the bared fangs actually read */
+.w-doge i:nth-child(10){left:50%;top:60px;width:30px;height:15px;margin-left:-15px;
+  border-radius:3px 3px 9px 9px;background:#5c1526}
+.w-doge i:nth-child(11){left:50%;top:60px;width:30px;height:9px;margin-left:-15px;background:#fff;
+  clip-path:polygon(0 0,100% 0,100% 35%,86% 100%,72% 35%,58% 100%,44% 35%,30% 100%,16% 35%,0 40%)}
+/* whale: the heavy one */
+.w-whale{width:104px;height:64px}
+.w-whale i:nth-child(1){left:0;top:8px;width:86px;height:52px;border-radius:52% 46% 46% 52%;
+  background:linear-gradient(160deg,#7fb6f2,#2f6fbf 60%,#1d4a86)}
+.w-whale i:nth-child(2){right:0;top:0;width:34px;height:34px;
+  background:#2f6fbf;clip-path:polygon(0 100%,100% 0,100% 100%)}
+.w-whale i:nth-child(3){left:14px;top:30px;width:12px;height:12px;border-radius:50%;background:#fff}
+.w-whale i:nth-child(4){left:17px;top:33px;width:6px;height:6px;border-radius:50%;background:#241a4d}
+
 /* ============ FX ============ */
 #fx{position:absolute;inset:0;z-index:7;pointer-events:none;overflow:hidden}
 #flash{position:absolute;inset:0;z-index:8;pointer-events:none;background:#fff;opacity:0}
@@ -543,8 +609,12 @@ header{position:relative;z-index:5;display:flex;align-items:center;gap:9px;paddi
 .raincloud::after{right:8px;top:-16px;width:36px;height:36px}
 .raincloud.dark{background:linear-gradient(#7d8bab,#4a5878)}
 .raincloud.dark::before,.raincloud.dark::after{background:#8c99b8}
-.raincloud.dark{animation:propdrift var(--dur) linear forwards,rumble .35s 3}
-@keyframes rumble{50%{transform:translateX(var(--shift)) translateY(3px)}}
+/* never touch `animation` here: re-declaring it restarts the drift from the left edge,
+   and a transform keyframe would fight the one moving the cloud. Flash instead. */
+.raincloud.dark{animation-name:propdrift,thunder;animation-duration:var(--dur),.4s;
+  animation-timing-function:linear,ease-out;animation-iteration-count:1,3;
+  animation-fill-mode:forwards,none}
+@keyframes thunder{0%,100%{filter:none}30%{filter:brightness(1.9)}}
 .drop{position:absolute;top:46px;width:6px;height:17px;border-radius:0 0 4px 4px;
   background:#7cb6e8;border:2px solid #2f5f92;animation:rainfall .8s linear infinite}
 @keyframes rainfall{from{transform:translateY(0);opacity:0}
@@ -656,6 +726,7 @@ footer.locked .wp{opacity:.55}
       <div id="purse">🪙 0</div>
       <div id="mess"></div>
       <div id="props"></div>
+      <div id="aim"></div>
       <div id="stage"></div>
       <div id="fx"></div>
       <div id="callout"><b></b><span></span></div>
@@ -1027,6 +1098,45 @@ function stepJoint(j, dt) {
   return j
 }
 
+
+/* ================= AIMED WEAPON =================
+   Follows the pointer and rotates so the striking end points at the boss. Each piece
+   of art is drawn with its business end downward, so the rotation is just the angle
+   to the boss minus 90 degrees. */
+const AIM_ART = {
+  candle: 'w-candle:2', bat: 'w-bat:2', hammer: 'w-hammer:2',
+  doge: 'w-doge:11', pizza: 'pizza', whale: 'w-whale:4',
+}
+function buildAim() {
+  const a = $('#aim'); if (!a) return
+  a.innerHTML = ''
+  const spec = AIM_ART[G.weapon]
+  if (!spec) return
+  if (spec === 'pizza') {
+    const holder = el('div', 'wpn')
+    const pz = pizzaNode('')
+    pz.style.left = '0'; pz.style.top = '0'
+    pz.style.setProperty('--pr', '0deg')
+    holder.appendChild(pz)
+    a.appendChild(holder)
+    return
+  }
+  const [cls, n] = spec.split(':')
+  a.appendChild(el('div', 'wpn ' + cls, '<i></i>'.repeat(+n)))
+}
+function moveAim(clientX, clientY) {
+  const a = $('#aim'); if (!a || G.over || !G.boss) return
+  const x = clientX - AR.left, y = clientY - AR.top
+  const ang = Math.atan2(bossCY() - y, bossCX() - x) * 180 / Math.PI - 90
+  a.style.transform = `translate3d(${x.toFixed(1)}px,${y.toFixed(1)}px,0) rotate(${ang.toFixed(1)}deg)`
+  a.classList.add('on')
+}
+function strikeAim() {
+  const a = $('#aim'); if (!a) return
+  a.classList.remove('hit'); void a.offsetWidth; a.classList.add('hit')
+  setTimeout(() => a.classList.remove('hit'), 240)
+}
+
 /* ================= BACKGROUND PROPS =================
    Scenery the player can turn on the boss. Deliberately dealing zero damage: this is
    the humiliation axis, kept separate from the balance the fight length depends on.
@@ -1040,10 +1150,11 @@ function clearProps() {
 }
 function scheduleProp() {
   clearTimeout(propTimer)
-  propTimer = setTimeout(() => { spawnProp(); scheduleProp() }, rnd(7000, 13000))
+  propTimer = setTimeout(() => { spawnProp(); scheduleProp() }, rnd(19000, 30000))
 }
 function spawnProp() {
   if (G.over || !theme.props || !theme.props.length) return
+  if ($('#props').children.length >= 2) return       // never crowd the sky
   const kind = pick(theme.props)
   if (kind !== 'raincloud') return
   const p = el('div', 'prop raincloud')
@@ -1291,7 +1402,8 @@ function buildWeapons() {
     const b = el('button', 'wp' + (w.id === G.weapon ? ' on' : ''),
       `<div class="i">${w.icon}</div><div class="n">${wpName(w)}</div><div class="d">${w.stars}</div><div class="cd" style="transform:scaleY(0)"></div>`)
     b.dataset.w = w.id
-    b.onclick = () => { G.weapon = w.id; document.querySelectorAll('.wp').forEach(x => x.classList.toggle('on', x === b)); Sound.play('block') }
+    b.onclick = () => { G.weapon = w.id; buildAim()
+      document.querySelectorAll('.wp').forEach(x => x.classList.toggle('on', x === b)); Sound.play('block') }
     wbar.appendChild(b)
   })
 }
@@ -1349,7 +1461,7 @@ function start(i) {
   $('#fx').innerHTML = ''
   $('#mess').innerHTML = ''; clearTimeout(sweepTimer); sweepTimer = 0
   clearProps(); scheduleProp()
-  setTimeout(() => { if (!$('#game').hidden && G.boss === b) spawnProp() }, 2500)
+  setTimeout(() => { if (!$('#game').hidden && G.boss === b) spawnProp() }, 6000)
   cinema(false, false)
   clearCoins()
   document.querySelectorAll('.coin,#shieldfx').forEach(n => n.remove())
@@ -1367,6 +1479,7 @@ function start(i) {
     bossEl.classList.add('held')
   })
   bossEl.addEventListener('pointermove', e => {
+    moveAim(e.clientX, e.clientY)
     if (!G.drag.on || e.pointerId !== G.drag.id) return
     G.drag.tx = (e.clientX - AR.left) - G.drag.ox - AR.w / 2
     G.drag.ty = (e.clientY - AR.top) - G.drag.oy - AR.ground + BODY_H / 2
@@ -1388,10 +1501,12 @@ function start(i) {
   bossEl.addEventListener('pointercancel', letGo)
   puppet.appendChild(bossEl); st.appendChild(puppet)
   skel = makeSkeleton(bossEl)
-  measure(); paintHp(); render()
+  measure(); paintHp(); render(); buildAim(); $('#aim').classList.remove('on')
   last = performance.now(); acc = 0
   requestAnimationFrame(loop)
 }
+$('#arena').addEventListener('pointermove', e => moveAim(e.clientX, e.clientY))
+$('#arena').addEventListener('pointerleave', () => $('#aim').classList.remove('on'))
 $('#arena').addEventListener('pointerdown', e => {
   if (G.over || G.cine || !G.boss) return
   dmgNum(e.clientX - AR.left, e.clientY - AR.top, t('miss'), 'miss')
@@ -1606,6 +1721,7 @@ function attack(e) {
   G.hitstop = w.hit === 'light' ? .015 : .075
   G.flee = w.hit === 'light' ? (Math.random() < .3 ? .8 : 0) : rnd(1.1, 1.9)
 
+  strikeAim()
   ouch(); addMark(e.clientX, e.clientY, w.hit !== 'light')
   dmgNum(x, y, dmg, crit ? 'crit' : w.id === 'whale' ? 'big' : '')
   bits(x, y, w.hit === 'light' ? 4 : 10)
