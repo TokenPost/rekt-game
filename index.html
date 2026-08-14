@@ -527,6 +527,34 @@ header{position:relative;z-index:5;display:flex;align-items:center;gap:9px;paddi
   transform:rotate(var(--pr)) scale(.8) scaleY(.5)}
 
 #mess{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden}
+/* ---- background props: scenery you can turn on the boss. They deal no damage;
+   the point is humiliation. The layer ignores pointers and only the prop itself
+   accepts them, so a prop can never swallow an attack or register a miss. ---- */
+#props{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden}
+.prop{position:absolute;pointer-events:auto;cursor:pointer;touch-action:manipulation;
+  animation:propdrift var(--dur) linear forwards}
+@keyframes propdrift{to{transform:translateX(var(--dist))}}
+.raincloud{width:96px;height:52px;border-radius:50% 50% 46% 46%;
+  background:linear-gradient(#ffffff,#dbe6f7);border:4px solid #241a4d;
+  box-shadow:0 5px 0 #00000018}
+.raincloud::before,.raincloud::after{content:'';position:absolute;border-radius:50%;
+  background:#f4f8ff;border:4px solid #241a4d}
+.raincloud::before{left:6px;top:-22px;width:44px;height:44px}
+.raincloud::after{right:8px;top:-16px;width:36px;height:36px}
+.raincloud.dark{background:linear-gradient(#7d8bab,#4a5878)}
+.raincloud.dark::before,.raincloud.dark::after{background:#8c99b8}
+.raincloud.dark{animation:propdrift var(--dur) linear forwards,rumble .35s 3}
+@keyframes rumble{50%{transform:translateX(var(--shift)) translateY(3px)}}
+.drop{position:absolute;top:46px;width:6px;height:17px;border-radius:0 0 4px 4px;
+  background:#7cb6e8;border:2px solid #2f5f92;animation:rainfall .8s linear infinite}
+@keyframes rainfall{from{transform:translateY(0);opacity:0}
+  15%{opacity:1}to{transform:translateY(var(--fall));opacity:.15}}
+.puddle{position:absolute;height:15px;border-radius:50%;background:#7cb6e8c4;
+  border:3px solid #2f5f9288;animation:stainin .4s ease-out}
+/* the boss just gets soaked — no damage, only dignity */
+.wet .skull,.wet .shirt,.wet .hood,.wet .dogeskull,.wet .snout,.wet .afro{filter:brightness(.86) saturate(.75)}
+.wet{animation:shiver .12s infinite}
+@keyframes shiver{50%{transform:translateX(1.5px)}}
 .stain{position:absolute;width:var(--sw);height:calc(var(--sw) * .34);margin-left:calc(var(--sw) / -2);
   border-radius:50%;background:radial-gradient(closest-side,#ffd06a,#e0912c 62%,#a35a10);
   border:3px solid #8a4a0d;opacity:.92;animation:stainin .35s ease-out}
@@ -627,6 +655,7 @@ footer.locked .wp{opacity:.55}
       <div id="combo"></div>
       <div id="purse">🪙 0</div>
       <div id="mess"></div>
+      <div id="props"></div>
       <div id="stage"></div>
       <div id="fx"></div>
       <div id="callout"><b></b><span></span></div>
@@ -823,7 +852,7 @@ const KO = {
    that touches the floor (landing, dust, stains, coin spawns, the stage anchor)
    reads it from here, so a new background is a data entry, not a hunt through code. */
 const THEMES = {
-  arena: { id:'arena', ground:.85, sun:'₿', banner:'TO THE MOON ARENA' },
+  arena: { id:'arena', ground:.85, sun:'₿', banner:'TO THE MOON ARENA', props:['raincloud'] },
 }
 let theme = THEMES.arena
 function applyTheme(name) {
@@ -961,6 +990,7 @@ const Sound = {
       }
       this.tone('sine', 560, 300, .28, .05, .04)
     }
+    else if (n === 'rain') { this.noise(1.6, .05, 2200); this.tone('sine', 90, 60, .5, .05) }
     else if (n === 'cashin') {                      // sweeping the floor into the purse
       for (let i = 0; i < 5; i++) this.tone('sine', 880 * (1 + i * .2), 660, .1, .032, i * .05)
     }
@@ -995,6 +1025,76 @@ function stepJoint(j, dt) {
   if (j.a < j.min) { j.a = j.min; j.v = -j.v * .35 }
   else if (j.a > j.max) { j.a = j.max; j.v = -j.v * .35 }
   return j
+}
+
+/* ================= BACKGROUND PROPS =================
+   Scenery the player can turn on the boss. Deliberately dealing zero damage: this is
+   the humiliation axis, kept separate from the balance the fight length depends on.
+   One tap arms a prop and it runs by itself for a few seconds — in a 45 second fight
+   taps are a scarce resource, so anything that needs repeated tapping to stay useful
+   would just be a damage loss and nobody would touch it. */
+let propTimer = 0
+function clearProps() {
+  clearTimeout(propTimer); propTimer = 0
+  const p = $('#props'); if (p) p.innerHTML = ''
+}
+function scheduleProp() {
+  clearTimeout(propTimer)
+  propTimer = setTimeout(() => { spawnProp(); scheduleProp() }, rnd(7000, 13000))
+}
+function spawnProp() {
+  if (G.over || !theme.props || !theme.props.length) return
+  const kind = pick(theme.props)
+  if (kind !== 'raincloud') return
+  const p = el('div', 'prop raincloud')
+  const w = 96, dist = AR.w + w + 40
+  p.style.left = (-w - 20) + 'px'
+  p.style.top = rnd(AR.h * .10, AR.h * .30).toFixed(0) + 'px'
+  p.style.setProperty('--dur', rnd(17, 26).toFixed(1) + 's')
+  p.style.setProperty('--dist', dist.toFixed(0) + 'px')
+  p.style.setProperty('--shift', '0px')
+  p.addEventListener('pointerdown', e => { e.stopPropagation(); burstRain(p) })
+  p.addEventListener('animationend', () => p.remove())
+  $('#props').appendChild(p)
+}
+function burstRain(cloud) {
+  if (cloud.classList.contains('dark')) return
+  cloud.classList.add('dark')
+  Sound.play('rain')
+  const fall = (AR.ground - parseFloat(cloud.style.top) - 46).toFixed(0) + 'px'
+  for (let i = 0; i < 16; i++) {
+    const d = el('i', 'drop')
+    d.style.left = (8 + (i % 8) * 11).toFixed(0) + 'px'
+    d.style.setProperty('--fall', fall)
+    d.style.animationDelay = (i * 52 + rnd(0, 90)).toFixed(0) + 'ms'
+    cloud.appendChild(d)
+  }
+  // soak him only while he is actually standing in it
+  let ticks = 0
+  const check = setInterval(() => {
+    if (G.over || !cloud.isConnected) return stop()
+    const cx = cloud.getBoundingClientRect().left - AR.left + 48
+    if (Math.abs(cx - bossCX()) < 95) {
+      bossEl.classList.add('wet')
+      if (ticks % 3 === 0) puddle(bossCX() + rnd(-40, 40))
+    }
+    if (++ticks > 16) stop()
+  }, 260)
+  function stop() {
+    clearInterval(check)
+    cloud.querySelectorAll('.drop').forEach(d => d.remove())
+    setTimeout(() => bossEl && bossEl.classList.remove('wet'), 1200)
+  }
+}
+function puddle(x) {
+  const m = $('#mess'), p = el('div', 'puddle')
+  const w = rnd(40, 78)
+  p.style.width = w.toFixed(0) + 'px'
+  p.style.left = (clamp(x, 30, AR.w - 30) - w / 2).toFixed(0) + 'px'
+  p.style.top = (AR.ground + rnd(0, 22)).toFixed(0) + 'px'
+  m.appendChild(p)
+  const all = m.querySelectorAll('.puddle')
+  for (let i = 0; i < all.length - 8; i++) all[i].remove()
 }
 
 /* ================= SIGNATURE REACTIONS =================
@@ -1248,6 +1348,8 @@ function start(i) {
   $('#purse').textContent = '🪙 0'
   $('#fx').innerHTML = ''
   $('#mess').innerHTML = ''; clearTimeout(sweepTimer); sweepTimer = 0
+  clearProps(); scheduleProp()
+  setTimeout(() => { if (!$('#game').hidden && G.boss === b) spawnProp() }, 2500)
   cinema(false, false)
   clearCoins()
   document.querySelectorAll('.coin,#shieldfx').forEach(n => n.remove())
@@ -1295,7 +1397,7 @@ $('#arena').addEventListener('pointerdown', e => {
   dmgNum(e.clientX - AR.left, e.clientY - AR.top, t('miss'), 'miss')
   Sound.play('miss'); G.combo = 0; G.comboTier = 0; paintCombo()
 })
-$('#back').onclick = () => { G.over = true; $('#game').hidden = true; $('#select').hidden = false }
+$('#back').onclick = () => { G.over = true; clearProps(); $('#game').hidden = true; $('#select').hidden = false }
 $('#sound').onclick = () => Sound.toggle()
 $('#sound2').onclick = () => Sound.toggle()
 $('#again').onclick = () => start(BOSSES.indexOf(G.boss))
