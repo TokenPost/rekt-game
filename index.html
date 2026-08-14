@@ -88,6 +88,34 @@ html[lang="ko"] #rekt .row button{font-size:16px}
 .hint{text-align:center;font-family:system-ui;font-weight:800;font-size:10px;letter-spacing:3px;color:#fff;
   text-shadow:0 2px 0 #241a4d;padding-top:8px}
 
+
+/* ================= SHOP ================= */
+#shopbtn{position:absolute;top:14px;left:16px;z-index:6;display:flex;align-items:center;gap:6px;
+  height:40px;padding:0 14px;border-radius:12px;border:3px solid #1c2a4a;background:#fff;color:#1c2a4a;
+  font-size:17px;box-shadow:0 4px 0 #1c2a4a55}
+#shopbtn:active{transform:translateY(3px);box-shadow:none}
+#shopbtn b{font-family:system-ui;font-weight:900;font-size:14px}
+#shop{position:absolute;inset:0;z-index:9;display:none;place-items:center;background:#241a4dcc;padding:18px}
+#shop.on{display:grid}
+#shop .panel{width:100%;max-width:400px;max-height:100%;overflow:auto;background:linear-gradient(#fff,#e8eeff);
+  border:4px solid #241a4d;border-radius:20px;box-shadow:0 8px 0 #241a4d66;padding:16px;color:#241a4d}
+#shop h3{text-align:center;font-size:30px;letter-spacing:2px;margin-bottom:2px}
+#shop .bal{text-align:center;font-family:system-ui;font-weight:800;font-size:13px;margin-bottom:12px}
+#shop .row{display:flex;align-items:center;gap:11px;border:3px solid #241a4d;border-radius:14px;
+  background:#fff;padding:9px 11px;margin-bottom:9px}
+#shop .art{position:relative;width:56px;height:64px;flex:0 0 56px}
+#shop .art .wpn{left:50%;top:50%;transform:translate(-50%,-50%) scale(.42)}
+#shop .meta{flex:1;min-width:0}
+#shop .meta b{display:block;font-size:17px;letter-spacing:.5px}
+#shop .meta span{display:block;font-family:system-ui;font-weight:700;font-size:10px;color:#5b6486}
+#shop button.buy{border:3px solid #241a4d;border-radius:11px;padding:8px 13px;font-size:15px;
+  background:#ffd75e;box-shadow:0 4px 0 #241a4d}
+#shop button.buy:active{transform:translateY(3px);box-shadow:0 1px 0 #241a4d}
+#shop button.buy[disabled]{background:#d8dcf0;color:#8b93b5;box-shadow:0 4px 0 #241a4d33}
+#shop .have{font-family:system-ui;font-weight:900;font-size:11px;color:#12a06e;letter-spacing:1px}
+#shop .close{display:block;width:100%;margin-top:6px;border:3px solid #241a4d;border-radius:13px;
+  padding:11px;font-size:18px;background:#fff;box-shadow:0 5px 0 #241a4d}
+
 /* ============ GAME SHELL ============ */
 #game{position:relative;height:100%;display:flex;flex-direction:column}
 header{position:relative;z-index:5;display:flex;align-items:center;gap:9px;padding:calc(9px + env(safe-area-inset-top)) 13px 8px}
@@ -438,6 +466,7 @@ header{position:relative;z-index:5;display:flex;align-items:center;gap:9px;paddi
 @keyframes shk{0%,100%{transform:translate(0,0)}20%{transform:translate(-9px,6px)}40%{transform:translate(8px,-7px)}60%{transform:translate(-7px,-4px)}80%{transform:translate(6px,6px)}}
 
 
+
 /* ================= AIMED WEAPON =================
    The selected weapon rides the pointer and tilts so its business end faces the boss.
    Drawn, not emoji, so it reads as a real object; one outline via the drop-shadow
@@ -451,6 +480,10 @@ header{position:relative;z-index:5;display:flex;align-items:center;gap:9px;paddi
          drop-shadow(0 8px 6px #0000003d)}
 #aim.hit .wpn{animation:wswing .22s cubic-bezier(.3,1.5,.5,1)}
 @keyframes wswing{45%{transform:translate(-50%,-10%) scale(1.14)}}
+/* thrown weapons are held small and cocked back, then leave the hand on release */
+#aim.throwable .wpn{transform:translate(-50%,-50%) scale(.62) rotate(-24deg)}
+#aim.tossed .wpn{animation:wtoss .38s ease-in forwards}
+@keyframes wtoss{to{transform:translate(-50%,150%) scale(.28) rotate(260deg);opacity:0}}
 .wpn i{position:absolute}
 
 /* red candle: an actual candlestick, wick and all */
@@ -458,12 +491,19 @@ header{position:relative;z-index:5;display:flex;align-items:center;gap:9px;paddi
 .w-candle i:nth-child(1){left:15px;top:0;width:4px;height:96px;background:#8e1c2c}
 .w-candle i:nth-child(2){left:0;top:20px;width:34px;height:58px;border-radius:4px;
   background:linear-gradient(100deg,#ff7d7d,#e01e2f 45%,#a2101f)}
-/* bat: tapered barrel with a grip */
-.w-bat{width:26px;height:104px}
-.w-bat i:nth-child(1){left:4px;top:0;width:18px;height:34px;border-radius:8px;
-  background:linear-gradient(#5a3a1c,#3a2410)}
-.w-bat i:nth-child(2){left:0;top:28px;width:26px;height:76px;border-radius:10px 10px 14px 14px;
-  background:linear-gradient(100deg,#f0d9a8,#c99a52 50%,#8d6524)}
+/* bat: knob, thin grip, and a barrel that actually tapers out. Pieces overlap and the
+   union outline welds them into one silhouette. */
+.w-bat{width:44px;height:158px}
+.w-bat i:nth-child(1){left:9px;top:0;width:26px;height:14px;border-radius:7px;
+  background:linear-gradient(100deg,#6d4620,#43290f)}
+.w-bat i:nth-child(2){left:14px;top:9px;width:16px;height:64px;border-radius:6px;
+  background:linear-gradient(100deg,#8a5c2a,#5c3a16)}
+.w-bat i:nth-child(3){left:8px;top:58px;width:28px;height:40px;border-radius:12px;
+  background:linear-gradient(100deg,#f2dcae,#c99a52 55%,#8d6524)}
+.w-bat i:nth-child(4){left:1px;top:84px;width:42px;height:74px;border-radius:16px 16px 21px 21px;
+  background:linear-gradient(100deg,#f7e4bd,#d2a55c 48%,#916826)}
+.w-bat i:nth-child(5){left:10px;top:100px;width:5px;height:44px;border-radius:3px;
+  background:#ffffff4d}
 /* hammer: handle plus a heavy head */
 .w-hammer{width:70px;height:104px}
 .w-hammer i:nth-child(1){left:27px;top:22px;width:16px;height:82px;border-radius:7px;
@@ -700,6 +740,13 @@ footer.locked .wp{opacity:.55}
   <section id="select">
     <div class="room" id="room1"></div>
     <div id="topbar"><button class="icobtn" id="lang2">한</button><button class="icobtn" id="sound2">🔊</button></div>
+    <button id="shopbtn">🛒 <b>0</b></button>
+    <div id="shop"><div class="panel">
+      <h3 id="shoptitle">SHOP</h3>
+      <div class="bal">🪙 <b id="shopbal">0</b></div>
+      <div id="shoplist"></div>
+      <button class="close" id="shopclose">CLOSE</button>
+    </div></div>
     <div class="wrap">
       <div class="logo">REKT</div>
       <div class="tag" id="tagline">BEAT THE CRYPTO BOSSES</div>
@@ -877,6 +924,11 @@ const UI = {
   combo:    { en:'COMBO x', ko:'콤보 x' },
   gas:      { en:'GAS', ko:'가스' },
   peg:      { en:'PEG', ko:'페그' },
+  shop:     { en:'SHOP', ko:'상점' },
+  buy:      { en:'BUY', ko:'구매' },
+  owned:    { en:'OWNED', ko:'보유중' },
+  close:    { en:'CLOSE', ko:'닫기' },
+  locked:   { en:'Locked — earn coins by fighting', ko:'잠김 — 싸워서 코인을 모으세요' },
 }
 const KO = {
   bosses: {
@@ -1099,17 +1151,80 @@ function stepJoint(j, dt) {
 }
 
 
+/* ================= SAVE =================
+   Coins and unlocks persist on the device. No account: there is nothing worth an
+   account yet, and asking for one before there is a save to protect is pure friction.
+   Client-side means the numbers are editable — acceptable while this is single player,
+   and the reason there is no leaderboard. */
+const FREE_WEAPONS = ['candle', 'bat', 'hammer', 'pizza']
+const PRICES = { doge: 600, whale: 900 }
+const Save = {
+  coins: 0, owned: FREE_WEAPONS.slice(),
+  load() {
+    try {
+      const raw = JSON.parse(localStorage.getItem('rekt.save') || '{}')
+      this.coins = Math.max(0, raw.coins | 0)
+      const own = Array.isArray(raw.owned) ? raw.owned : []
+      this.owned = [...new Set([...FREE_WEAPONS, ...own.filter(id => PRICES[id])])]
+    } catch (_) { /* corrupt save: start clean rather than crash into a blank screen */ }
+  },
+  save() {
+    try { localStorage.setItem('rekt.save', JSON.stringify({ coins: this.coins, owned: this.owned })) } catch (_) {}
+  },
+  has(id) { return this.owned.includes(id) },
+  buy(id) {
+    const price = PRICES[id]
+    if (!price || this.has(id) || this.coins < price) return false
+    this.coins -= price; this.owned.push(id); this.save(); return true
+  },
+}
+Save.load()
+
+function paintPurse() {
+  const n = Save.coins
+  const pu = $('#purse'); if (pu) pu.textContent = '🪙 ' + n
+  const sb = $('#shopbtn b'); if (sb) sb.textContent = n
+  const bal = $('#shopbal'); if (bal) bal.textContent = n
+}
+function buildShop() {
+  $('#shoptitle').textContent = t('shop')
+  $('#shopclose').textContent = t('close')
+  const list = $('#shoplist'); list.innerHTML = ''
+  WEAPONS.filter(w => PRICES[w.id]).forEach(w => {
+    const owned = Save.has(w.id), afford = Save.coins >= PRICES[w.id]
+    const row = el('div', 'row')
+    row.innerHTML = `<div class="art"></div>
+      <div class="meta"><b>${wpName(w)}</b><span>${w.stars} · ${owned ? t('owned') : '🪙 ' + PRICES[w.id]}</span></div>`
+    const art = row.querySelector('.art')
+    const spec = AIM_ART[w.id]
+    if (spec && spec !== 'pizza') {
+      const [cls, n] = spec.split(':')
+      art.appendChild(el('div', 'wpn ' + cls, '<i></i>'.repeat(+n)))
+    }
+    if (owned) row.appendChild(el('div', 'have', t('owned')))
+    else {
+      const b = el('button', 'buy', t('buy'))
+      b.disabled = !afford
+      b.onclick = () => { if (Save.buy(w.id)) { Sound.play('coins'); paintPurse(); buildShop(); buildWeapons() } }
+      row.appendChild(b)
+    }
+    list.appendChild(row)
+  })
+  paintPurse()
+}
+
 /* ================= AIMED WEAPON =================
    Follows the pointer and rotates so the striking end points at the boss. Each piece
    of art is drawn with its business end downward, so the rotation is just the angle
    to the boss minus 90 degrees. */
 const AIM_ART = {
-  candle: 'w-candle:2', bat: 'w-bat:2', hammer: 'w-hammer:2',
+  candle: 'w-candle:2', bat: 'w-bat:5', hammer: 'w-hammer:2',
   doge: 'w-doge:11', pizza: 'pizza', whale: 'w-whale:4',
 }
 function buildAim() {
   const a = $('#aim'); if (!a) return
   a.innerHTML = ''
+  a.classList.toggle('throwable', !!W(G.weapon).splat)
   const spec = AIM_ART[G.weapon]
   if (!spec) return
   if (spec === 'pizza') {
@@ -1131,10 +1246,11 @@ function moveAim(clientX, clientY) {
   a.style.transform = `translate3d(${x.toFixed(1)}px,${y.toFixed(1)}px,0) rotate(${ang.toFixed(1)}deg)`
   a.classList.add('on')
 }
-function strikeAim() {
+function strikeAim(toss) {
   const a = $('#aim'); if (!a) return
-  a.classList.remove('hit'); void a.offsetWidth; a.classList.add('hit')
-  setTimeout(() => a.classList.remove('hit'), 240)
+  const cls = toss ? 'tossed' : 'hit'
+  a.classList.remove('hit', 'tossed'); void a.offsetWidth; a.classList.add(cls)
+  setTimeout(() => a.classList.remove(cls), toss ? 400 : 240)
 }
 
 /* ================= BACKGROUND PROPS =================
@@ -1398,7 +1514,8 @@ function buildRoster() {
 }
 function buildWeapons() {
   const wbar = $('#weapons'); wbar.innerHTML = ''
-  WEAPONS.forEach(w => {
+  if (!Save.has(G.weapon)) G.weapon = 'candle'
+  WEAPONS.filter(w => Save.has(w.id)).forEach(w => {
     const b = el('button', 'wp' + (w.id === G.weapon ? ' on' : ''),
       `<div class="i">${w.icon}</div><div class="n">${wpName(w)}</div><div class="d">${w.stars}</div><div class="cd" style="transform:scaleY(0)"></div>`)
     b.dataset.w = w.id
@@ -1418,7 +1535,8 @@ function applyLang() {
   $('#peg').querySelector('span').textContent = t('peg')
   const l = ko() ? 'EN' : '한'
   $('#lang').textContent = l; $('#lang2').textContent = l
-  buildRoster(); buildWeapons()
+  buildRoster(); buildWeapons(); paintPurse()
+  if ($('#shop').classList.contains('on')) buildShop()
   if (G.boss) $('#bname').textContent = bossName(G.boss)
 }
 function toggleLang() {
@@ -1457,7 +1575,7 @@ function start(i) {
   if (b.id === 'algorithm') paintPeg()
   $('#gas').classList.remove('max'); $('#gas .bar i').style.width = '0%'
   $('#combo').classList.remove('on')
-  $('#purse').textContent = '🪙 0'
+  paintPurse()
   $('#fx').innerHTML = ''
   $('#mess').innerHTML = ''; clearTimeout(sweepTimer); sweepTimer = 0
   clearProps(); scheduleProp()
@@ -1542,9 +1660,9 @@ function dust(x, y) { at(el('div', 'dust'), x, y) }
    couple of seconds later. Nothing persists between fights — this is feedback, not economy. */
 let sweepTimer = 0
 function addPurse(n) {
-  G.purse += n
+  Save.coins += n; Save.save()
+  paintPurse()
   const pu = $('#purse')
-  pu.textContent = '🪙 ' + G.purse
   pu.classList.add('bump'); setTimeout(() => pu.classList.remove('bump'), 140)
 }
 function goldDrop(x, y, n, worth) {
@@ -1721,7 +1839,7 @@ function attack(e) {
   G.hitstop = w.hit === 'light' ? .015 : .075
   G.flee = w.hit === 'light' ? (Math.random() < .3 ? .8 : 0) : rnd(1.1, 1.9)
 
-  strikeAim()
+  strikeAim(!!w.splat)
   ouch(); addMark(e.clientX, e.clientY, w.hit !== 'light')
   dmgNum(x, y, dmg, crit ? 'crit' : w.id === 'whale' ? 'big' : '')
   bits(x, y, w.hit === 'light' ? 4 : 10)
@@ -2071,6 +2189,9 @@ setInterval(() => {
 applyTheme('arena')   // must follow AR: it calls measure()
 $('#lang').onclick = toggleLang
 $('#lang2').onclick = toggleLang
+$('#shopbtn').onclick = () => { Sound.boot(); buildShop(); $('#shop').classList.add('on') }
+$('#shopclose').onclick = () => $('#shop').classList.remove('on')
+$('#shop').onclick = e => { if (e.target.id === 'shop') $('#shop').classList.remove('on') }
 applyLang()          // builds the roster and the weapon bar in the current language
 paintSound()
 
