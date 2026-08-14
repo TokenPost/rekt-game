@@ -102,7 +102,30 @@ header{position:relative;z-index:5;display:flex;align-items:center;gap:9px;paddi
 @keyframes pulse{50%{opacity:.5}}
 
 #arena{position:relative;flex:1;overflow:hidden}
-#stage{position:absolute;left:0;right:0;bottom:15%;height:0;z-index:3}
+/* the floor line is a theme value, not a constant — every background sets its own */
+#stage{position:absolute;left:0;right:0;bottom:var(--stage-bottom,15%);height:0;z-index:3}
+
+/* ---- cutscene: the game steps back and lets you watch the boss act ---- */
+#cinema{position:absolute;inset:0;z-index:8;opacity:0;pointer-events:none;transition:opacity .3s}
+#cinema.on{opacity:1;pointer-events:auto}
+#cinema .bar{position:absolute;left:0;right:0;height:0;background:#0b0713;
+  transition:height .35s cubic-bezier(.3,1.3,.5,1)}
+#cinema.on .bar{height:13%}
+#cinema .bar.t{top:0}
+#cinema .bar.b{bottom:0}
+#cinema .veil{position:absolute;inset:0;opacity:0;transition:opacity .3s;
+  background:radial-gradient(56% 44% at 50% 52%,transparent 38%,#0b0713e0)}
+#cinema.dim .veil{opacity:1}
+#cinema .card{position:absolute;left:50%;top:17%;transform:translateX(-50%) scale(.8);
+  opacity:0;transition:transform .35s cubic-bezier(.2,1.6,.4,1),opacity .3s;text-align:center;white-space:nowrap}
+#cinema.dim .card{opacity:1;transform:translateX(-50%) scale(1)}
+#cinema .ct{display:block;font-size:40px;color:var(--c);-webkit-text-stroke:6px #0b0713;paint-order:stroke fill}
+#cinema .cs{display:block;font-family:system-ui;font-weight:800;font-size:12px;color:#fff;margin-top:6px;
+  text-shadow:0 2px 0 #0b0713;white-space:normal;max-width:300px}
+/* everything but the boss recedes */
+.cine .room{filter:saturate(.25) brightness(.5)}
+.cine #weapons,.cine header{filter:saturate(.3) brightness(.6)}
+.cine .boss{filter:drop-shadow(0 0 26px #ffffff77)}
 .puppet{position:absolute;left:50%;bottom:0;width:200px;height:330px;margin-left:-100px;will-change:transform}
 
 /* ============ SKELETON RIG ============
@@ -538,6 +561,8 @@ footer::-webkit-scrollbar{display:none}
       <div id="fx"></div>
       <div id="callout"><b></b><span></span></div>
       <div id="flash"></div>
+      <div id="cinema"><i class="bar t"></i><i class="bar b"></i><div class="veil"></div>
+        <div class="card"><b class="ct"></b><span class="cs"></span></div></div>
     </div>
     <footer id="weapons"></footer>
     <div id="rekt">
@@ -567,14 +592,14 @@ const pick = a => a[Math.floor(Math.random() * a.length)]
    Lines are IN-CHARACTER PARODY riffing on the themes each is publicly known for
    (gas fees, network speed, memes, marketing) — not verbatim quotes. */
 const BOSSES = [
-  { intro:'He guards on and off. While he blocks, your damage is halved.', id:'ghost', name:'THE GHOST', coin:'BITCOIN', mech:'HODL MODE', hp:1000,
+  { intro:'He guards on and off. While he blocks, your damage is halved.', id:'ghost', name:'THE GHOST', coin:'BITCOIN', mech:'HODL MODE', hp:1800,
     c:'#f7931a', face:'mystery', logo:'₿', shirt:'#3b4360', skin:'#e8b48c', voice:90,
     tw:132, th:104, armw:36, uplen:56, forelen:52, legw:34, thighlen:54, shinlen:50, legspan:96,
     lines:['Still here.','I never sold.','You cannot ban math.','Nine pages was enough.','Twenty-one million. Final.'] },
 
   // Vitalik: very long narrow face, huge forehead, hollow cheeks, pale eyes,
   // thin swept dirty-blonde hair, famously spindly frame.
-  { intro:'Tapping too fast overheats him and weakens every hit.', id:'architect', name:'THE ARCHITECT', coin:'ETHEREUM', mech:'HIGH GAS', hp:1000,
+  { intro:'Tapping too fast overheats him and weakens every hit.', id:'architect', name:'THE ARCHITECT', coin:'ETHEREUM', mech:'HIGH GAS', hp:1550,
     c:'#5b6dff', skin:'#f7cfae', hair:'#c2a071', shirt:'#8ea2ff', logo:'Ξ', iris:'#6fa3d6', gaunt:1, voice:230,
     hw:88, hh:134, hr:'44% 44% 58% 58%', neckw:32,
     hairh:'30px', hairr:'54% 54% 4% 4%', fringew:'58px', fringeh:'26px',
@@ -584,7 +609,7 @@ const BOSSES = [
     lines:['Gas is high right now.','That is a scaling problem.','Have you tried a rollup?','It is a feature.','Layer two would fix this.'] },
 
   // Anatoly: broad square head, buzzed dark hair, heavy brows, full beard, engineer headset.
-  { intro:'He never stops moving. Miss him and your combo resets.', id:'speedrunner', name:'THE SPEEDRUNNER', coin:'SOLANA', mech:'HIGH SPEED', hp:900,
+  { intro:'He never stops moving. Miss him and your combo resets.', id:'speedrunner', name:'THE SPEEDRUNNER', coin:'SOLANA', mech:'HIGH SPEED', hp:1700,
     c:'#12e39a', skin:'#efb389', hair:'#2a2018', shirt:'#12b47a', logo:'◎', iris:'#4a3520',
     beard:1, headset:1, voice:130,
     hw:116, hh:106, hr:'36% 36% 40% 40%', neckw:46,
@@ -596,13 +621,13 @@ const BOSSES = [
 
   // Dogecoin: the 2013 joke coin. Its defining trait is INFINITE SUPPLY — it never
   // stops minting — so the boss prints coins that heal him unless you smash them.
-  { intro:'He prints coins that heal him. Smash them before they land.', id:'memelord', name:'THE MEME LORD', coin:'DOGECOIN', mech:'INFINITE SUPPLY', hp:1000,
+  { intro:'He prints coins that heal him. Smash them before they land.', id:'memelord', name:'THE MEME LORD', coin:'DOGECOIN', mech:'INFINITE SUPPLY', hp:1800,
     c:'#c2a633', face:'doge', logo:'Ð', shirt:'#c2a633', skin:'#e8b48c', voice:330,
     tw:132, th:104, armw:36, uplen:56, forelen:52, legw:34, thighlen:54, shinlen:50, legspan:96,
     lines:['Wow.','Such bonk. Very ouch.','So print. Much supply.','No limit. Ever.','Only a joke. Still winning.'] },
 
   // Justin: round full-cheeked face, small eyes, heavy black side-parted fringe, big grin.
-  { intro:'He raises a shield once. Break it before you can hurt him.', id:'showman', name:'THE SHOWMAN', coin:'TRON', mech:'ENERGY SHIELD', hp:950,
+  { intro:'He raises a shield once. Break it before you can hurt him.', id:'showman', name:'THE SHOWMAN', coin:'TRON', mech:'ENERGY SHIELD', hp:1700,
     c:'#ff3b4e', skin:'#f8d3b0', hair:'#191a26', shirt:'#ff3b4e', logo:'⚡', iris:'#2b2118',
     grin:1, suit:1, chub:1, glasses:1, voice:200,
     hw:120, hh:110, hr:'48% 48% 50% 50%', neckw:42,
@@ -615,7 +640,7 @@ const BOSSES = [
 /* ---- the collapse class: three projects people are still angry about ---- */
 BOSSES.push(
   // TERRA / LUNA — the algorithmic peg that ate itself. Young, boyish, permanently smug.
-  { intro:'His peg soaks damage. Break it and he starts collapsing on his own.', id:'algorithm', name:'THE ALGORITHM', coin:'TERRA LUNA', mech:'DEATH SPIRAL', hp:1050,
+  { intro:'His peg soaks damage. Break it and he starts collapsing on his own.', id:'algorithm', name:'THE ALGORITHM', coin:'TERRA LUNA', mech:'DEATH SPIRAL', hp:1900,
     c:'#ffd83d', skin:'#f4cba4', hair:'#141118', shirt:'#1d2a52', logo:'🌙', iris:'#2b2118',
     smirk:1, voice:170,
     hw:108, hh:106, hr:'44% 44% 50% 50%', neckw:42,
@@ -626,7 +651,7 @@ BOSSES.push(
     lines:['The peg holds.','Steady. Steady.','This is temporary.','Just add more reserve.','Math does not lose.'] },
 
   // FTX — the mop of curls, the t-shirt, the missing customer money.
-  { intro:'The health bar he is showing you cannot be trusted.', id:'altruist', name:'THE ALTRUIST', coin:'FTX', mech:'BALANCE SHEET', hp:900,
+  { intro:'The health bar he is showing you cannot be trusted.', id:'altruist', name:'THE ALTRUIST', coin:'FTX', mech:'BALANCE SHEET', hp:1350,
     c:'#5fcade', skin:'#f0cba8', hair:'#6b4a2f', shirt:'#3f4a5c', logo:'∞', iris:'#4a3520',
     afro:1, bare:1, voice:210,
     hw:100, hh:104, hr:'46% 46% 52% 52%', neckw:36,
@@ -638,7 +663,7 @@ BOSSES.push(
            'I did not mean to.','Let me post an apology thread.'] },
 
   // SQUID-style rug: the dev was always anonymous, so the mask IS the character.
-  { intro:'When he is hurt he runs off with the bag. Do not let him reach the edge.', id:'rug', name:'THE RUG', coin:'SQUID', mech:'EXIT SCAM', hp:880,
+  { intro:'When he is hurt he runs off with the bag. Do not let him reach the edge.', id:'rug', name:'THE RUG', coin:'SQUID', mech:'EXIT SCAM', hp:1600,
     c:'#ff2d78', face:'rug', logo:'🦑', shirt:'#3a1030', skin:'#e8b48c', voice:260,
     tw:132, th:104, armw:34, uplen:56, forelen:52, legw:34, thighlen:54, shinlen:50, legspan:96,
     lines:['gm.','Liquidity is locked. Trust me.','Dev is not selling.','It is a marketing wallet.','brb'] },
@@ -655,11 +680,12 @@ const WEAPONS = [
   { id:'candle', icon:'🔻', name:'RED CANDLE',  dmg:6,   cd:110,  stars:'★★',    hit:'light',  sfx:'hit',   spark:'🔻', drop:'🔻', kick:130,  lift:170,  spin:130 },
   { id:'bat',    icon:'⚾', name:'BASEBALL BAT', dmg:15,  cd:340,  stars:'★★★',   hit:'mid',    sfx:'crack', spark:'💢', swing:'🏏', kick:430,  lift:400,  spin:400, shout:'CRACK!' },
   { id:'hammer', icon:'🔨', name:'FUD HAMMER',  dmg:26,  cd:640,  stars:'★★★★',  hit:'heavy',  sfx:'heavy', spark:'💥', swing:'🔨', kick:560,  lift:640,  spin:520, shout:'FUD!' },
-  { id:'doge',   icon:'🐕', name:'DOGE MISSILE', dmg:38, cd:1600, stars:'★★★★',  hit:'heavy',  sfx:'bark',  spark:'🐕', fly:'🐕',  kick:660,  lift:520,  spin:640, shout:'MUCH DAMAGE!' },
+  { id:'doge',   icon:'🐕', name:'DOGE MISSILE', dmg:32, cd:1600, stars:'★★★★',  hit:'heavy',  sfx:'bark',  spark:'🐕', fly:'🐕',  kick:660,  lift:520,  spin:640, shout:'MUCH DAMAGE!' },
   { id:'pizza',  icon:'🍕', name:'PIZZA THROW', dmg:12,  cd:900,  stars:'★★',    hit:'mid',    sfx:'splat', spark:'🧀', kick:230,  lift:250,  spin:260, shout:'10,000 BTC!', splat:1 },
-  { id:'whale',  icon:'🐋', name:'WHALE DUMP',  dmg:200, cd:6000, stars:'★★★★★', hit:'launch', sfx:'whale', spark:'🌊', kick:1150, lift:1250, spin:900, shout:'WHALE ALERT!' },
+  { id:'whale',  icon:'🐋', name:'WHALE DUMP',  dmg:150, cd:6000, stars:'★★★★★', hit:'launch', sfx:'whale', spark:'🌊', kick:1150, lift:1250, spin:900, shout:'WHALE ALERT!' },
 ]
 const PAIN = ['OUCH!', 'OW!', 'AAH!', 'STOP!', 'OOF!', 'MY BAGS!']
+const SWING_LOCK = 800   // ms you are committed after any swing, capped so the whale is still usable
 
 /* ================= LANGUAGE =================
    English above is the source of truth; Korean is an overlay keyed by the same ids,
@@ -720,6 +746,21 @@ const KO = {
     'CAUGHT HIM':'탈출 저지 — 피해 120, 가방은 여기 남는다.',
   },
 }
+/* ================= BACKGROUND THEMES =================
+   ground = where the floor line sits, as a fraction of arena height. Every system
+   that touches the floor (landing, dust, stains, coin spawns, the stage anchor)
+   reads it from here, so a new background is a data entry, not a hunt through code. */
+const THEMES = {
+  arena: { id:'arena', ground:.85, sun:'₿', banner:'TO THE MOON ARENA' },
+}
+let theme = THEMES.arena
+function applyTheme(name) {
+  theme = THEMES[name] || THEMES.arena
+  document.documentElement.style.setProperty('--stage-bottom', ((1 - theme.ground) * 100).toFixed(2) + '%')
+  buildRoom($('#room1')); buildRoom($('#room2'))
+  measure()
+}
+
 const ko = () => lang === 'ko'
 const t = k => UI[k][lang] || UI[k].en
 const kb = b => (ko() && KO.bosses[b.id]) || null
@@ -1000,9 +1041,9 @@ function makeSkeleton(fig) {
 
 /* ================= BACKGROUND ================= */
 function buildRoom(root) {
-  root.innerHTML = `<div class="rays"></div><div class="sun">₿</div>
+  root.innerHTML = `<div class="rays"></div><div class="sun">${theme.sun}</div>
     <div class="skyline"></div><div class="floor"></div><div class="mat"></div>
-    <div class="banner">TO THE MOON ARENA</div>`
+    <div class="banner">${theme.banner}</div>`
   const sky = root.querySelector('.skyline')
   ;[46, 72, 34, 88, 58, 96, 40, 78, 30, 66, 84, 50].forEach((h, i) => {
     const c = el('i'); if (i % 3 === 1) c.className = 'd'; c.style.height = h + '%'; sky.appendChild(c)
@@ -1018,8 +1059,6 @@ function buildRoom(root) {
     root.appendChild(f)
   })
 }
-buildRoom($('#room1')); buildRoom($('#room2'))
-
 /* ================= STATE ================= */
 const G = {
   boss: null, hp: 0, max: 0, weapon: 'candle', over: false,
@@ -1027,8 +1066,8 @@ const G = {
   combo: 0, reboot: 0, rebootShown: false,
   shield: 0, shieldMax: 180, shieldUsed: false,
   coins: [], marks: {}, nMarks: 0,
-  peg: 1, spiral: false, books: false, exit: 0,
-  sigT: 0, sigAt: 0, purse: 0,
+  peg: 1, spiral: false, books: false, exit: 0, exitPrep: false,
+  sigT: 0, sigAt: 0, purse: 0, lock: 0, cine: false,
   x: 0, y: 0, vx: 0, vy: 0, prevVx: 0,
   tx: 0, moveT: 0, walk: 90, flee: 0, hitstop: 0, step: 0, bob: 0,
   talkAt: 0,
@@ -1040,7 +1079,7 @@ function measure() {
   const a = $('#arena'); if (!a) return
   const r = a.getBoundingClientRect()
   AR.w = r.width; AR.h = r.height; AR.left = r.left; AR.top = r.top
-  AR.ground = r.height * .85            // #stage bottom:15%
+  AR.ground = r.height * theme.ground    // kept in lockstep with --stage-bottom
 }
 addEventListener('resize', measure)
 const lim = () => Math.max(20, (AR.w - 190) / 2)
@@ -1100,8 +1139,8 @@ function start(i) {
     hodl: false, hodlT: 4, gas: 0, gasMax: false,
     combo: 0, reboot: 0, rebootShown: false,
     shield: 0, shieldUsed: false, marks: {}, nMarks: 0,
-    peg: 1, spiral: false, books: false, exit: 0,
-    sigT: 0, sigAt: 0, purse: 0,
+    peg: 1, spiral: false, books: false, exit: 0, exitPrep: false,
+    sigT: 0, sigAt: 0, purse: 0, lock: 0, cine: false,
     x: 0, y: 0, vx: 0, vy: 0, prevVx: 0,
     tx: 0, moveT: 1.2, flee: 0, hitstop: 0, step: 0, bob: 0, talkAt: 0,
     walk: b.id === 'speedrunner' ? 235 : 86,
@@ -1121,6 +1160,7 @@ function start(i) {
   $('#purse').textContent = '🪙 0'
   $('#fx').innerHTML = ''
   $('#mess').innerHTML = ''
+  cinema(false, false)
   clearCoins()
   document.querySelectorAll('.coin,#shieldfx').forEach(n => n.remove())
 
@@ -1135,7 +1175,7 @@ function start(i) {
   requestAnimationFrame(loop)
 }
 $('#arena').addEventListener('pointerdown', e => {
-  if (G.over || !G.boss) return
+  if (G.over || G.cine || !G.boss) return
   dmgNum(e.clientX - AR.left, e.clientY - AR.top, t('miss'), 'miss')
   Sound.play('miss'); G.combo = 0; paintCombo()
 })
@@ -1184,6 +1224,23 @@ function coinBurst(x, y, n) {
 }
 function banner(t, c) { const b = el('div', 'banner-fx', t); b.style.color = c || '#fff'; pop(b) }
 // says, in plain words, what the boss just pulled — mechanics are useless if unreadable
+// hands the screen over to the boss for a beat: letterbox in, world dims, taps ignored
+function cinema(on, dim) {
+  const c = $('#cinema')
+  c.classList.toggle('on', !!on)
+  c.classList.toggle('dim', !!dim)
+  $('#app').classList.toggle('cine', !!dim)
+}
+function cutscene(title, body, koBody, ms, then) {
+  G.cine = true
+  $('#callout').classList.remove('on')      // the small card would collide with the title
+  Voice.stop()
+  const c = $('#cinema')
+  c.querySelector('.ct').textContent = title
+  c.querySelector('.cs').textContent = ko() ? (koBody || body) : body
+  cinema(true, true)
+  setTimeout(() => { G.cine = false; cinema(true, false); if (then) then() }, ms)
+}
 function mechanic(title, body, koBody) {
   const c = $('#callout')
   c.querySelector('b').textContent = title
@@ -1265,10 +1322,13 @@ function limp() {                                  // KO: joints go slack
 
 /* ================= ATTACK ================= */
 function attack(e) {
-  if (G.over) return
+  if (G.over || G.cine) return
   const w = W(G.weapon), now = performance.now()
-  if (now < G.cd[w.id]) return
+  // per-weapon cooldown AND a shared swing lock: without the lock a player can fire
+  // every weapon in parallel and stack their cooldowns into ~2x the intended damage
+  if (now < G.cd[w.id] || now < G.lock) return
   G.cd[w.id] = now + w.cd
+  G.lock = now + Math.min(w.cd, SWING_LOCK)
 
   const x = e.clientX - AR.left, y = e.clientY - AR.top
   const b = G.boss
@@ -1402,19 +1462,27 @@ function paintPeg() {
 }
 /* EXIT SCAM — he bolts for the edge with the bag. Stop him or he comes back richer. */
 function startExit() {
-  G.exit = 3.4; banner('EXIT SCAM!', '#ff2d78'); talk(true)
-  mechanic('EXIT SCAM', 'He is sprinting for the edge with the bag. Knock him back before he gets there!'); signature(1)
-  bossEl.classList.add('scared')
+  G.exitPrep = true                       // frozen in place while the camera watches him decide
+  signature(1); bubble('brb')
+  cutscene('EXIT SCAM',
+    'He just grabbed the bag and turned for the exit. When the bars lift, knock him back before he reaches the edge.',
+    '가방을 챙기고 출구로 돌아섰다. 검은 띠가 걷히면, 끝에 닿기 전에 쳐서 막아라.',
+    2100, () => {
+      G.exitPrep = false
+      G.exit = 4.5
+      bossEl.classList.add('scared')
+      banner('RUN!', '#ff2d78'); Sound.play('bark')
+    })
 }
 function rugEscaped() {
-  G.exit = 0; G.x = 0; G.vx = 0
+  G.exit = 0; G.x = 0; G.vx = 0; cinema(false, false)
   G.hp = Math.min(G.max, G.hp + G.max * .25)
   banner('HE RUGGED YOU!', '#ff2d78'); Sound.play('ko'); flash(); shake('l')
   mechanic('RUGGED', 'He made it out and came back with 25% more health. Do not let it happen twice.')
   bubble('brb'); paintHp(); paintDamageStage()
 }
 function rugCaught() {
-  G.exit = 0; bossEl.classList.remove('scared')
+  G.exit = 0; bossEl.classList.remove('scared'); cinema(false, false)
   banner('RUG PULLED BACK!', '#12e39a'); Sound.play('heavy'); shake('m')
   mechanic('CAUGHT HIM', 'You stopped the exit — 120 damage and the bag stays here.')
   G.hp = Math.max(0, G.hp - 120); whip(1, 800); G.vy -= 380
@@ -1502,11 +1570,11 @@ function physics(dt) {
   // grounded locomotion — flee after a hit, otherwise wander, so aiming matters
   if (G.sigT > 0) { G.sigT -= dt; if (G.sigT <= 0) restorePose() }
   const settled = !airborne && Math.abs(G.vx) < 70
-  if (!G.over && settled) {
+  if (!G.over && settled && !G.exitPrep) {
     if (G.exit > 0) {                              // sprinting for the edge with the bag
       G.exit -= dt
       const dir = G.x >= 0 ? 1 : -1
-      G.x += dir * 430 * dt
+      G.x += dir * 120 * dt          // 430 crossed the arena in 0.38s: invisible and unreactable
       G.step += dt * 18
       if (Math.abs(G.x) >= L - 3) rugEscaped()
       else if (G.exit <= 0) rugCaught()
@@ -1588,12 +1656,14 @@ setInterval(() => {
   if ($('#game').hidden) return
   const now = performance.now()
   document.querySelectorAll('.wp').forEach(b => {
-    const w = W(b.dataset.w), left = G.cd[w.id] - now
-    b.querySelector('.cd').style.transform = 'scaleY(' + clamp(left / w.cd, 0, 1) + ')'
+    const w = W(b.dataset.w)
+    const left = Math.max(G.cd[w.id] - now, G.lock - now)
+    b.querySelector('.cd').style.transform = 'scaleY(' + clamp(left / Math.min(w.cd, SWING_LOCK), 0, 1) + ')'
   })
 }, 60)
 
 /* ---- boot ---- */
+applyTheme('arena')   // must follow AR: it calls measure()
 $('#lang').onclick = toggleLang
 $('#lang2').onclick = toggleLang
 applyLang()          // builds the roster and the weapon bar in the current language
