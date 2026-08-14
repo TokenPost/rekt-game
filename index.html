@@ -162,6 +162,39 @@ html[lang="ko"] #rekt .row button{font-size:16px}
   background:var(--sc);animation:markin .2s;transition:transform 2.2s cubic-bezier(.6,0,.9,.4);z-index:7}
 .smear.drip{transform:translateY(120px) rotate(18deg)}
 
+
+/* ================= STAGE: TRADING FLOOR ================= */
+.room.floor{background:linear-gradient(#171d33 0%,#232b48 55%,#2c3557 100%)}
+.floor .wall{position:absolute;left:0;right:0;top:0;height:56%;display:grid;
+  grid-template-columns:repeat(4,1fr);gap:8px;padding:14px 12px}
+.floor .scr{position:relative;border:4px solid #0b0f1d;border-radius:8px;overflow:hidden;
+  background:#0d1425;
+  display:flex;align-items:flex-end;gap:3px;padding:5px}
+.floor .scr i{flex:1;border-radius:1px;background:#16c784}
+.floor .scr i.d{background:#ea3943}
+.floor .scr::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(120deg,#ffffff1f,transparent 45%)}
+.floor .desk{position:absolute;left:0;right:0;bottom:16%;height:16%;
+  background:linear-gradient(#414c74,#2b3350);
+  border-top:5px solid #0b0f1d;border-bottom:5px solid #0b0f1d}
+.floor .rug2{position:absolute;left:0;right:0;bottom:0;height:16%;
+  background:repeating-linear-gradient(90deg,#2a3350 0 34px,#333d5f 34px 68px)}
+.floor .tape{position:absolute;left:0;right:0;top:58%;height:26px;background:#0b0f1d;
+  color:#ea3943;font-family:system-ui;font-weight:900;font-size:13px;letter-spacing:3px;
+  display:flex;align-items:center;overflow:hidden;white-space:nowrap;border-block:3px solid #000}
+.floor .tape span{animation:ticker 18s linear infinite;padding-left:100%}
+@keyframes ticker{to{transform:translateX(-100%)}}
+/* the prop: a screen you can pull a red candle out of */
+.screen{width:86px;height:62px;border:4px solid #0b0f1d;border-radius:8px;background:#111a30;
+  display:flex;align-items:flex-end;gap:4px;padding:6px;box-shadow:0 0 0 3px #ffffff1a}
+.screen i{flex:1;border-radius:2px;background:#ea3943}
+.screen.spent{opacity:.3}
+.bigcandle{position:absolute;z-index:6;width:46px;pointer-events:none;
+  background:linear-gradient(100deg,#ff7d7d,#e01e2f 45%,#a2101f);border:4px solid #241a4d;
+  border-radius:5px;animation:candledrop .5s cubic-bezier(.5,0,.85,1) forwards}
+@keyframes candledrop{0%{transform:translateY(-60px) scaleY(.5);opacity:0}
+  25%{opacity:1}100%{transform:translateY(var(--cd));opacity:1}}
+
 /* ============ GAME SHELL ============ */
 #game{position:relative;height:100%;display:flex;flex-direction:column}
 header{position:relative;z-index:5;display:flex;align-items:center;gap:9px;padding:calc(9px + env(safe-area-inset-top)) 13px 8px}
@@ -869,14 +902,14 @@ const pick = a => a[Math.floor(Math.random() * a.length)]
    Lines are IN-CHARACTER PARODY riffing on the themes each is publicly known for
    (gas fees, network speed, memes, marketing) — not verbatim quotes. */
 const BOSSES = [
-  { intro:'He guards on and off. While he blocks, your damage is halved.', id:'ghost', name:'THE GHOST', coin:'BITCOIN', mech:'HODL MODE', hp:1800,
+  { intro:'He guards on and off. While he blocks, your damage is halved.', stage:'arena', id:'ghost', name:'THE GHOST', coin:'BITCOIN', mech:'HODL MODE', hp:1800,
     c:'#f7931a', face:'mystery', logo:'₿', shirt:'#3b4360', skin:'#e8b48c', voice:90,
     tw:132, th:104, armw:36, uplen:56, forelen:52, legw:34, thighlen:54, shinlen:50, legspan:96,
     lines:['Still here.','I never sold.','You cannot ban math.','Nine pages was enough.','Twenty-one million. Final.'] },
 
   // Vitalik: very long narrow face, huge forehead, hollow cheeks, pale eyes,
   // thin swept dirty-blonde hair, famously spindly frame.
-  { intro:'Tapping too fast overheats him and weakens every hit.', id:'architect', name:'THE ARCHITECT', coin:'ETHEREUM', mech:'HIGH GAS', hp:1550,
+  { intro:'Tapping too fast overheats him and weakens every hit.', stage:'arena', id:'architect', name:'THE ARCHITECT', coin:'ETHEREUM', mech:'HIGH GAS', hp:1550,
     c:'#5b6dff', skin:'#f7cfae', hair:'#c2a071', shirt:'#8ea2ff', logo:'Ξ', iris:'#6fa3d6', gaunt:1, voice:230,
     hw:88, hh:134, hr:'44% 44% 58% 58%', neckw:32,
     hairh:'30px', hairr:'54% 54% 4% 4%', fringew:'58px', fringeh:'26px',
@@ -886,7 +919,7 @@ const BOSSES = [
     lines:['Gas is high right now.','That is a scaling problem.','Have you tried a rollup?','It is a feature.','Layer two would fix this.'] },
 
   // Anatoly: broad square head, buzzed dark hair, heavy brows, full beard, engineer headset.
-  { intro:'He never stops moving. Miss him and your combo resets.', id:'speedrunner', name:'THE SPEEDRUNNER', coin:'SOLANA', mech:'HIGH SPEED', hp:1700,
+  { intro:'He never stops moving. Miss him and your combo resets.', stage:'arena', id:'speedrunner', name:'THE SPEEDRUNNER', coin:'SOLANA', mech:'HIGH SPEED', hp:1700,
     c:'#12e39a', skin:'#efb389', hair:'#2a2018', shirt:'#12b47a', logo:'◎', iris:'#4a3520',
     beard:1, headset:1, voice:130,
     hw:116, hh:106, hr:'36% 36% 40% 40%', neckw:46,
@@ -898,13 +931,13 @@ const BOSSES = [
 
   // Dogecoin: the 2013 joke coin. Its defining trait is INFINITE SUPPLY — it never
   // stops minting — so the boss prints coins that heal him unless you smash them.
-  { intro:'He prints coins that heal him. Smash them before they land.', id:'memelord', name:'THE MEME LORD', coin:'DOGECOIN', mech:'INFINITE SUPPLY', hp:1800,
+  { intro:'He prints coins that heal him. Smash them before they land.', stage:'arena', id:'memelord', name:'THE MEME LORD', coin:'DOGECOIN', mech:'INFINITE SUPPLY', hp:1800,
     c:'#c2a633', face:'doge', logo:'Ð', shirt:'#c2a633', skin:'#e8b48c', voice:330,
     tw:132, th:104, armw:36, uplen:56, forelen:52, legw:34, thighlen:54, shinlen:50, legspan:96,
     lines:['Wow.','Such bonk. Very ouch.','So print. Much supply.','No limit. Ever.','Only a joke. Still winning.'] },
 
   // Justin: round full-cheeked face, small eyes, heavy black side-parted fringe, big grin.
-  { intro:'He raises a shield once. Break it before you can hurt him.', id:'showman', name:'THE SHOWMAN', coin:'TRON', mech:'ENERGY SHIELD', hp:1700,
+  { intro:'He raises a shield once. Break it before you can hurt him.', stage:'grocery', id:'showman', name:'THE SHOWMAN', coin:'TRON', mech:'ENERGY SHIELD', hp:1700,
     c:'#ff3b4e', skin:'#f8d3b0', hair:'#191a26', shirt:'#ff3b4e', logo:'⚡', iris:'#2b2118',
     grin:1, suit:1, chub:1, glasses:1, crown:1, voice:200,
     hw:120, hh:110, hr:'48% 48% 50% 50%', neckw:42,
@@ -917,7 +950,7 @@ const BOSSES = [
 /* ---- the collapse class: three projects people are still angry about ---- */
 BOSSES.push(
   // TERRA / LUNA — the algorithmic peg that ate itself. Young, boyish, permanently smug.
-  { intro:'His peg soaks damage. Break it and he starts collapsing on his own.', id:'algorithm', name:'THE ALGORITHM', coin:'TERRA LUNA', mech:'DEATH SPIRAL', hp:1900,
+  { intro:'His peg soaks damage. Break it and he starts collapsing on his own.', stage:'floor', id:'algorithm', name:'THE ALGORITHM', coin:'TERRA LUNA', mech:'DEATH SPIRAL', hp:1900,
     c:'#ffd83d', skin:'#f4cba4', hair:'#141118', shirt:'#1d2a52', logo:'🌙', iris:'#2b2118',
     smirk:1, voice:170,
     hw:108, hh:106, hr:'44% 44% 50% 50%', neckw:42,
@@ -928,7 +961,7 @@ BOSSES.push(
     lines:['The peg holds.','Steady. Steady.','This is temporary.','Just add more reserve.','Math does not lose.'] },
 
   // FTX — the mop of curls, the t-shirt, the missing customer money.
-  { intro:'The health bar he is showing you cannot be trusted.', id:'altruist', name:'THE ALTRUIST', coin:'FTX', mech:'BALANCE SHEET', hp:1350,
+  { intro:'The health bar he is showing you cannot be trusted.', stage:'floor', id:'altruist', name:'THE ALTRUIST', coin:'FTX', mech:'BALANCE SHEET', hp:1350,
     c:'#5fcade', skin:'#f0cba8', hair:'#6b4a2f', shirt:'#3f4a5c', logo:'∞', iris:'#4a3520',
     afro:1, bare:1, voice:210,
     hw:106, hh:100, hr:'46% 46% 56% 56%', neckw:34,
@@ -940,7 +973,7 @@ BOSSES.push(
            'I did not mean to.','Let me post an apology thread.'] },
 
   // SQUID-style rug: the dev was always anonymous, so the mask IS the character.
-  { intro:'When he is hurt he runs off with the bag. Do not let him reach the edge.', id:'rug', name:'THE RUG', coin:'SQUID', mech:'EXIT SCAM', hp:1600,
+  { intro:'When he is hurt he runs off with the bag. Do not let him reach the edge.', stage:'grocery', id:'rug', name:'THE RUG', coin:'SQUID', mech:'EXIT SCAM', hp:1600,
     c:'#ff2d78', face:'rug', logo:'🦑', shirt:'#3a1030', skin:'#e8b48c', voice:260,
     tw:132, th:104, armw:34, uplen:56, forelen:52, legw:34, thighlen:54, shinlen:50, legspan:96,
     lines:['gm.','Liquidity is locked. Trust me.','Dev is not selling.','It is a marketing wallet.','brb'] },
@@ -1041,6 +1074,8 @@ const THEMES = {
              name:{ en:'TO THE MOON ARENA', ko:'투 더 문 아레나' }, sun:'₿', banner:'TO THE MOON ARENA' },
   grocery: { id:'grocery', ground:.82, kind:'grocery', props:['eggbox','picklejar'],
              name:{ en:'GROCERY', ko:'마트' }, banner:'AISLE 7 — EGGS & PICKLES' },
+  floor:   { id:'floor', ground:.84, kind:'floor', props:['screen'],
+             name:{ en:'TRADING FLOOR', ko:'트레이딩 플로어' }, banner:'MARGIN CALL' },
 }
 let theme = THEMES.arena
 function applyTheme(name) {
@@ -1226,7 +1261,7 @@ function stepJoint(j, dt) {
    and the reason there is no leaderboard. */
 const FREE_WEAPONS = ['candle', 'bat', 'hammer', 'pizza']
 const PRICES = { doge: 600, whale: 900 }
-const STAGE_PRICES = { grocery: 1200 }
+const STAGE_PRICES = { grocery: 1200, floor: 2000 }
 const Save = {
   coins: 0, owned: FREE_WEAPONS.slice(), stages: ['arena'], stage: 'arena',
   load() {
@@ -1277,7 +1312,7 @@ function buildStages() {
       stageName(id) + (owned ? '' : '  🔒 ' + STAGE_PRICES[id]))
     b.onclick = () => {
       if (!owned) { Sound.boot(); buildShop(); $('#shop').classList.add('on'); return }
-      Save.stage = id; Save.save(); applyTheme(id); buildStages()
+      Save.stage = id; Save.save(); applyTheme(id); buildStages(); buildRoster()
     }
     bar.appendChild(b)
   })
@@ -1291,12 +1326,13 @@ function buildShop() {
     const th = THEMES[id]
     const row = el('div', 'row')
     row.innerHTML = `<div class="art" style="font-size:30px;display:grid;place-items:center">🏬</div>
-      <div class="meta"><b>${stageName(id)}</b><span>${t('stages')} · ${owned ? t('owned') : '🪙 ' + STAGE_PRICES[id]}</span></div>`
+      <div class="meta"><b>${stageName(id)}</b><span>${bossesOf(id).map(bossName).join(' · ')}</span>
+        <span>${owned ? t('owned') : '🪙 ' + STAGE_PRICES[id]}</span></div>`
     if (owned) row.appendChild(el('div', 'have', t('owned')))
     else {
       const b = el('button', 'buy', t('buy'))
       b.disabled = !afford
-      b.onclick = () => { if (Save.buyStage(id)) { Sound.play('coins'); applyTheme(id); paintPurse(); buildShop(); buildStages() } }
+      b.onclick = () => { if (Save.buyStage(id)) { Sound.play('coins'); applyTheme(id); paintPurse(); buildShop(); buildStages(); buildRoster() } }
       row.appendChild(b)
     }
     list.appendChild(row)
@@ -1429,6 +1465,7 @@ function spawnProp() {
   if ($('#props').children.length >= 2) return       // never crowd the sky
   const kind = pick(theme.props)
   if (kind === 'eggbox' || kind === 'picklejar') return spawnShelfProp(kind)
+  if (kind === 'screen') return spawnScreen()
   if (kind !== 'raincloud') return
   const p = el('div', 'prop raincloud')
   const w = 96, dist = AR.w + w + 40
@@ -1442,6 +1479,41 @@ function spawnProp() {
   $('#props').appendChild(p)
 }
 
+function spawnScreen() {
+  const p = el('div', 'prop screen', '<i style="height:30%"></i><i style="height:62%"></i><i style="height:44%"></i><i style="height:78%"></i>')
+  const x = rnd(30, AR.w - 120)
+  p.style.left = x.toFixed(0) + 'px'
+  p.style.top = (AR.h * .12).toFixed(0) + 'px'
+  p.style.animation = 'none'
+  let left = 2
+  p.addEventListener('pointerdown', e => {
+    e.stopPropagation()
+    if (left <= 0) return
+    left--
+    dropCandle()
+    if (left <= 0) { p.classList.add('spent'); setTimeout(() => p.remove(), 2400) }
+  })
+  $('#props').appendChild(p)
+  setTimeout(() => { if (p.isConnected && left > 0) p.remove() }, 24000)
+}
+// a red candle falls out of the chart onto his head. Humiliating, harmless.
+function dropCandle() {
+  const c = el('div', 'bigcandle')
+  const h = rnd(90, 150)
+  c.style.height = h.toFixed(0) + 'px'
+  c.style.left = (bossCX() - 23 + rnd(-24, 24)).toFixed(0) + 'px'
+  c.style.top = (bossCY() - BODY_H / 2 - h).toFixed(0) + 'px'
+  c.style.setProperty('--cd', (BODY_H * .55).toFixed(0) + 'px')
+  $('#fx').appendChild(c)
+  Sound.play('heavy', .8)
+  setTimeout(() => {
+    c.remove()
+    if (G.over || !bossEl) return
+    shake('m'); dust(bossCX(), AR.ground + 4)
+    whip(Math.random() < .5 ? 1 : -1, 420)
+    for (const j of skel) j.v += rnd(-90, 90)
+  }, 500)
+}
 function spawnShelfProp(kind) {
   const p = el('div', 'prop ' + kind, '<b></b><b></b><b></b>')
   const x = rnd(40, AR.w - 110), y = AR.h * (kind === 'eggbox' ? .30 : .52)
@@ -1633,6 +1705,7 @@ function makeSkeleton(fig) {
 function buildRoom(root, th) {
   root.className = 'room ' + th.kind
   if (th.kind === 'grocery') return buildGrocery(root, th)
+  if (th.kind === 'floor') return buildFloor(root, th)
   root.innerHTML = `<div class="rays"></div><div class="sun">${th.sun}</div>
     <div class="skyline"></div><div class="floor"></div><div class="mat"></div>
     <div class="banner">${th.banner}</div>`
@@ -1652,6 +1725,14 @@ function buildRoom(root, th) {
   })
 }
 
+function buildFloor(root, th) {
+  const bars = n => Array.from({ length: n }, (_, i) =>
+    `<i class="${(i * 7) % 3 === 0 ? 'd' : ''}" style="height:${18 + (i * 23) % 70}%"></i>`).join('')
+  root.innerHTML = `
+    <div class="wall">${Array.from({ length: 8 }, () => `<div class="scr">${bars(9)}</div>`).join('')}</div>
+    <div class="tape"><span>${th.banner} · ${th.banner} · ${th.banner} · ${th.banner}</span></div>
+    <div class="desk"></div><div class="rug2"></div>`
+}
 function buildGrocery(root, th) {
   const box = ['#e05c5c','#5c8fe0','#e0c25c','#7fc46a','#c47fd8','#e0925c']
   const shelf = (top) => `<div class="shelf" style="top:${top}%">` +
@@ -1695,13 +1776,14 @@ const bossCY = () => AR.ground + G.y - BODY_H / 2
 const ceilY = () => Math.min(-20, BODY_H - AR.ground + 10)
 
 /* ================= SELECT / WEAPON BAR ================= */
+const bossesOf = st => BOSSES.filter(b => b.stage === st)
 function buildRoster() {
   const roster = $('#roster'); roster.innerHTML = ''
-  BOSSES.forEach((b, i) => {
+  bossesOf(Save.stage).forEach(b => {
     const c = el('button', 'card', `<div class="prev"></div><div class="n">${bossName(b)}</div><div class="c">${b.coin}</div><div class="m">${b.mech}</div>`)
     c.style.setProperty('--c', b.c)
     c.querySelector('.prev').appendChild(figure(b))
-    c.onclick = () => start(i)
+    c.onclick = () => start(b.id)
     roster.appendChild(c)
   })
 }
@@ -1740,9 +1822,9 @@ function toggleLang() {
 const W = id => WEAPONS.find(w => w.id === id)
 
 /* ================= START ================= */
-function start(i) {
+function start(id) {
   Sound.boot()
-  const b = BOSSES[i]
+  const b = (typeof id === 'string' ? BOSSES.find(x => x.id === id) : BOSSES[id]) || BOSSES[0]
   const cd = {}; WEAPONS.forEach(w => cd[w.id] = 0)
   Object.assign(G, {
     boss: b, max: b.hp, hp: b.hp, over: false, cd,
@@ -1826,8 +1908,11 @@ $('#arena').addEventListener('pointerdown', e => {
 $('#back').onclick = () => { G.over = true; clearProps(); $('#game').hidden = true; $('#select').hidden = false }
 $('#sound').onclick = () => Sound.toggle()
 $('#sound2').onclick = () => Sound.toggle()
-$('#again').onclick = () => start(BOSSES.indexOf(G.boss))
-$('#next').onclick = () => start((BOSSES.indexOf(G.boss) + 1) % BOSSES.length)
+$('#again').onclick = () => start(G.boss.id)
+$('#next').onclick = () => {
+  const list = bossesOf(G.boss.stage)
+  start(list[(list.findIndex(b => b.id === G.boss.id) + 1) % list.length].id)
+}
 
 /* ================= FX ================= */
 function shake(kind) {
