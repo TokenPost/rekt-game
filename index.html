@@ -116,12 +116,15 @@ header{position:relative;z-index:5;display:flex;align-items:center;gap:9px;paddi
 #cinema .veil{position:absolute;inset:0;opacity:0;transition:opacity .3s;
   background:radial-gradient(56% 44% at 50% 52%,transparent 38%,#0b0713e0)}
 #cinema.dim .veil{opacity:1}
-#cinema .card{position:absolute;left:50%;top:17%;transform:translateX(-50%) scale(.8);
-  opacity:0;transition:transform .35s cubic-bezier(.2,1.6,.4,1),opacity .3s;text-align:center;white-space:nowrap}
+#cinema .card{position:absolute;left:50%;top:16%;transform:translateX(-50%) scale(.8);
+  opacity:0;transition:transform .35s cubic-bezier(.2,1.6,.4,1),opacity .3s;text-align:center}
 #cinema.dim .card{opacity:1;transform:translateX(-50%) scale(1)}
-#cinema .ct{display:block;font-size:40px;color:var(--c);-webkit-text-stroke:6px #0b0713;paint-order:stroke fill}
-#cinema .cs{display:block;font-family:system-ui;font-weight:800;font-size:12px;color:#fff;margin-top:6px;
-  text-shadow:0 2px 0 #0b0713;white-space:normal;max-width:300px}
+#cinema .ct{display:block;font-size:38px;color:var(--c);-webkit-text-stroke:6px #0b0713;
+  paint-order:stroke fill;white-space:nowrap}
+/* the line was white-on-busy-background and unreadable — give it its own solid plate */
+#cinema .cs{display:block;font-family:system-ui;font-weight:800;font-size:15px;color:#241a4d;
+  background:#fff;border:4px solid #241a4d;border-radius:14px;padding:8px 16px;margin:8px auto 0;
+  box-shadow:0 5px 0 #0b0713aa;max-width:290px;line-height:1.35}
 /* everything but the boss recedes */
 .cine .room{filter:saturate(.25) brightness(.5)}
 .cine #weapons,.cine header{filter:saturate(.3) brightness(.6)}
@@ -255,16 +258,21 @@ header{position:relative;z-index:5;display:flex;align-items:center;gap:9px;paddi
 @keyframes wisp{50%{transform:translateY(-9px) scaleX(1.25);opacity:.5}}
 .ouch .glow{background:#fff;box-shadow:0 0 26px #fff}
 
-/* ---- FTX: the curl mop is the whole silhouette ---- */
-.afro{position:absolute;left:-24px;right:-24px;top:-40px;height:84px;border-radius:50% 50% 44% 44%;
-  background:radial-gradient(circle at 34% 28%,color-mix(in srgb,var(--hair) 100%,#fff 24%),var(--hair) 70%);
+/* ---- FTX: one big mop, low over the brow. Lobes are large and overlapping so the
+   outline reads as curls rather than a row of separate balls. ---- */
+.afro{position:absolute;left:-30px;right:-30px;top:-52px;height:82px;
+  border-radius:54% 54% 40% 40%;z-index:2;
+  background:radial-gradient(circle at 34% 24%,color-mix(in srgb,var(--hair) 100%,#fff 28%),var(--hair) 74%);
   border:4px solid #241a4d}
-.afro i{position:absolute;width:46px;height:46px;border-radius:50%;border:4px solid #241a4d;
-  background:radial-gradient(circle at 36% 30%,color-mix(in srgb,var(--hair) 100%,#fff 20%),var(--hair))}
-.afro i:nth-child(1){left:-16px;top:22px}
-.afro i:nth-child(2){right:-16px;top:18px}
-.afro i:nth-child(3){left:16%;top:-16px;width:52px;height:52px}
-.afro i:nth-child(4){right:14%;top:-12px}
+.afro i{position:absolute;border-radius:50%;border:4px solid #241a4d;
+  background:radial-gradient(circle at 38% 30%,color-mix(in srgb,var(--hair) 100%,#fff 20%),var(--hair))}
+.afro i:nth-child(1){left:-16px;top:42px;width:56px;height:56px}
+.afro i:nth-child(2){right:-16px;top:38px;width:58px;height:58px}
+.afro i:nth-child(3){left:6%;top:-20px;width:66px;height:66px}
+.afro i:nth-child(4){right:4%;top:-24px;width:60px;height:60px}
+.afro i:nth-child(5){left:35%;top:-30px;width:56px;height:56px}
+.afro::after{content:'';position:absolute;left:8%;right:8%;bottom:-6px;height:22px;
+  border-radius:0 0 50% 50%;background:#0000002e}
 .bare .shin{background:linear-gradient(color-mix(in srgb,var(--skin) 100%,#fff 12%),var(--skin))}
 .bare .leg{background:linear-gradient(160deg,#5b6480,#39415f)}
 /* ---- SQUID-style rug: anonymous dev, so the mask is the face ---- */
@@ -353,14 +361,22 @@ header{position:relative;z-index:5;display:flex;align-items:center;gap:9px;paddi
 .sig-hug .bag{transform:scale(1.4) rotate(-14deg)}
 
 #purse{position:absolute;left:12px;top:10px;z-index:6;font-size:20px;color:#ffe066;
-  -webkit-text-stroke:5px #241a4d;paint-order:stroke fill;transition:transform .1s}
-#purse.bump{transform:scale(1.22)}
-.cfx{position:absolute;width:17px;height:17px;margin:-8px 0 0 -8px;border-radius:50%;
+  -webkit-text-stroke:5px #241a4d;paint-order:stroke fill;transition:transform .12s}
+#purse.bump{transform:scale(1.3)}
+/* coins spill out of him, lie on the floor, then get swept into the purse in batches.
+   They live in the floor layer, which is pointer-events:none, so they never eat a tap. */
+.gold{position:absolute;width:15px;height:15px;margin:-7px 0 0 -7px;border-radius:50%;
   background:radial-gradient(circle at 36% 30%,#ffe680,#c2a633);border:3px solid #241a4d;
-  animation:cfx .62s cubic-bezier(.35,-0.3,.6,1) forwards}
-@keyframes cfx{0%{transform:translate(0,0) scale(.4)}
-  26%{transform:translate(var(--sx),var(--sy)) scale(1.15)}
-  100%{transform:translate(var(--dx),var(--dy)) scale(.35);opacity:.15}}
+  box-shadow:0 2px 0 #00000026;animation:goldfall .6s cubic-bezier(.3,.5,.5,1) both}
+@keyframes goldfall{
+  0%{transform:translate(var(--sx),var(--sy)) scale(.4)}
+  40%{transform:translate(calc(var(--sx) * .4),calc(var(--sy) * .35 - 44px)) scale(1.1)}
+  100%{transform:translate(0,0) rotate(var(--r)) scale(1)}}
+.gold.gone{animation:goldgo .6s ease-in forwards}
+@keyframes goldgo{
+  0%{transform:translate(0,0) rotate(var(--r)) scale(1);opacity:1}
+  25%{transform:translate(calc(var(--gx) * .18),calc(var(--gy) * .18 - 34px)) scale(1.2)}
+  100%{transform:translate(var(--gx),var(--gy)) scale(.25);opacity:0}}
 .dmg.crit{font-size:66px;color:#ffe066}
 .critlabel{position:absolute;font-size:30px;color:#fff;-webkit-text-stroke:6px #c81e3a;paint-order:stroke fill;
   animation:critpop .6s forwards}
@@ -499,6 +515,7 @@ header{position:relative;z-index:5;display:flex;align-items:center;gap:9px;paddi
 footer{position:relative;z-index:5;display:flex;gap:8px;padding:9px 12px calc(11px + env(safe-area-inset-bottom));
   overflow-x:auto;scrollbar-width:none}
 footer::-webkit-scrollbar{display:none}
+footer.locked .wp{opacity:.55}
 .wp{position:relative;flex:0 0 84px;border:4px solid #241a4d;border-radius:16px;padding:7px 3px;text-align:center;
   background:linear-gradient(#ffffff,#dfe6ff);color:#241a4d;overflow:hidden;box-shadow:0 5px 0 #241a4d55;transition:transform .07s}
 .wp:active{transform:translateY(4px);box-shadow:0 1px 0 #241a4d55}
@@ -656,10 +673,10 @@ BOSSES.push(
   { intro:'The health bar he is showing you cannot be trusted.', id:'altruist', name:'THE ALTRUIST', coin:'FTX', mech:'BALANCE SHEET', hp:1350,
     c:'#5fcade', skin:'#f0cba8', hair:'#6b4a2f', shirt:'#3f4a5c', logo:'∞', iris:'#4a3520',
     afro:1, bare:1, voice:210,
-    hw:100, hh:104, hr:'46% 46% 52% 52%', neckw:36,
+    hw:106, hh:100, hr:'46% 46% 56% 56%', neckw:34,
     hairh:'30px', hairr:'50%', fringew:'0px', fringeh:'0px',
-    eyey:'42px', eyex:'15px', eyew:'25px', eyeh:'24px', browlift:'13px', broww:'26px', browh:'6px',
-    nosey:'24px', nosew:'14px', noseh:'18px', mouthb:'16px', mouthw:'34px', mouthh:'13px', chinw:'44px',
+    eyey:'44px', eyex:'19px', eyew:'22px', eyeh:'21px', browlift:'12px', broww:'24px', browh:'6px',
+    nosey:'22px', nosew:'13px', noseh:'16px', mouthb:'15px', mouthw:'30px', mouthh:'12px', chinw:'52px',
     tw:140, th:104, armw:32, uplen:54, forelen:50, legw:34, thighlen:50, shinlen:46, legspan:98,
     lines:['It was an accounting error.','The funds are... somewhere.','We were solvent yesterday.',
            'I did not mean to.','Let me post an apology thread.'] },
@@ -687,7 +704,7 @@ const WEAPONS = [
   { id:'whale',  icon:'🐋', name:'WHALE DUMP',  dmg:150, cd:6000, stars:'★★★★★', hit:'launch', sfx:'whale', spark:'🌊', kick:1150, lift:1250, spin:900, shout:'WHALE ALERT!' },
 ]
 const PAIN = ['OUCH!', 'OW!', 'AAH!', 'STOP!', 'OOF!', 'MY BAGS!']
-const THROW_GAIN = 1.15, THROW_MAX = 2600   // how hard a flick throws him, and the ceiling
+const THROW_GAIN = 1.05, THROW_MAX = 1500   // hard enough to feel, low enough to stay on screen
 const SWING_LOCK = 800   // ms you are committed after any swing, capped so the whale is still usable
 
 /* ================= LANGUAGE =================
@@ -1011,7 +1028,7 @@ function figure(b) {
          <div class="nose"></div>
          <div class="mouth"><div class="teeth"></div></div>
          ${b.beard ? '<div class="stache"></div>' : ''}
-         ${b.afro ? '<div class="afro"><i></i><i></i><i></i><i></i></div>' : '<div class="hair"></div>'}
+         ${b.afro ? '<div class="afro"><i></i><i></i><i></i><i></i><i></i></div>' : '<div class="hair"></div>'}
          ${d.fringew !== '0px' && !b.afro ? '<div class="fringe"></div>' : ''}
          ${b.glasses ? '<div class="glasses"><i></i><i></i></div>' : ''}
          ${b.headset ? '<div class="headset"></div>' : ''}
@@ -1066,7 +1083,7 @@ function buildRoom(root) {
 const G = {
   boss: null, hp: 0, max: 0, weapon: 'candle', over: false,
   cd: {}, hodl: false, hodlT: 4, gas: 0, gasMax: false,
-  combo: 0, reboot: 0, rebootShown: false,
+  combo: 0, reboot: 0, rebootShown: false, talkIn: 5,
   shield: 0, shieldMax: 180, shieldUsed: false,
   coins: [], marks: {}, nMarks: 0,
   peg: 1, spiral: false, books: false, exit: 0, exitPrep: false,
@@ -1090,6 +1107,7 @@ const lim = () => Math.max(20, (AR.w - 190) / 2)
 const bossCX = () => AR.w / 2 + G.x
 const BODY_H = 330
 const bossCY = () => AR.ground + G.y - BODY_H / 2
+const ceilY = () => Math.min(-20, BODY_H - AR.ground + 10)
 
 /* ================= SELECT / WEAPON BAR ================= */
 function buildRoster() {
@@ -1141,7 +1159,7 @@ function start(i) {
   Object.assign(G, {
     boss: b, max: b.hp, hp: b.hp, over: false, cd,
     hodl: false, hodlT: 4, gas: 0, gasMax: false,
-    combo: 0, reboot: 0, rebootShown: false,
+    combo: 0, reboot: 0, rebootShown: false, talkIn: 5,
     shield: 0, shieldUsed: false, marks: {}, nMarks: 0,
     peg: 1, spiral: false, books: false, exit: 0, exitPrep: false,
     sigT: 0, sigAt: 0, purse: 0, lock: 0, cine: false,
@@ -1164,7 +1182,7 @@ function start(i) {
   $('#combo').classList.remove('on')
   $('#purse').textContent = '🪙 0'
   $('#fx').innerHTML = ''
-  $('#mess').innerHTML = ''
+  $('#mess').innerHTML = ''; clearTimeout(sweepTimer); sweepTimer = 0
   cinema(false, false)
   clearCoins()
   document.querySelectorAll('.coin,#shieldfx').forEach(n => n.remove())
@@ -1238,22 +1256,46 @@ function bits(x, y, n, color) {
   }
 }
 function dust(x, y) { at(el('div', 'dust'), x, y) }
-// every hit pays out — pure feedback, no shop and nothing persists between fights
-function coinBurst(x, y, n) {
-  const px = 30 - x, py = 22 - y
-  for (let i = 0; i < n; i++) {
-    const c = el('i', 'cfx')
-    c.style.setProperty('--sx', rnd(-70, 70).toFixed(0) + 'px')
-    c.style.setProperty('--sy', rnd(-90, -30).toFixed(0) + 'px')
-    c.style.setProperty('--dx', px.toFixed(0) + 'px')
-    c.style.setProperty('--dy', py.toFixed(0) + 'px')
-    c.style.animationDelay = (i * 28) + 'ms'
-    at(c, x, y)
-  }
+/* Coins fall out of him and lie on the floor; a sweep gathers them into the purse a
+   couple of seconds later. Nothing persists between fights — this is feedback, not economy. */
+let sweepTimer = 0
+function addPurse(n) {
   G.purse += n
   const pu = $('#purse')
   pu.textContent = '🪙 ' + G.purse
-  pu.classList.add('bump'); setTimeout(() => pu.classList.remove('bump'), 110)
+  pu.classList.add('bump'); setTimeout(() => pu.classList.remove('bump'), 140)
+}
+function goldDrop(x, y, n, worth) {
+  const mess = $('#mess')
+  for (let i = 0; i < n; i++) {
+    const fx = clamp(x + rnd(-95, 95), 22, AR.w - 22), fy = AR.ground + rnd(-6, 26)
+    const c = el('i', 'gold')
+    c.style.left = fx + 'px'; c.style.top = fy + 'px'
+    c.style.setProperty('--sx', (x - fx).toFixed(0) + 'px')
+    c.style.setProperty('--sy', (y - fy).toFixed(0) + 'px')
+    c.style.setProperty('--r', rnd(-200, 200).toFixed(0) + 'deg')
+    c.style.animationDelay = (i * 45) + 'ms'
+    c.dataset.v = worth || 1
+    mess.appendChild(c)
+  }
+  if (mess.querySelectorAll('.gold:not(.gone)').length > 36) sweepGold()
+  else if (!sweepTimer) sweepTimer = setTimeout(sweepGold, 2400)
+}
+function sweepGold() {
+  clearTimeout(sweepTimer); sweepTimer = 0
+  const coins = [...$('#mess').querySelectorAll('.gold:not(.gone)')]
+  if (!coins.length) return
+  let total = 0
+  coins.forEach((c, i) => {
+    const fx = parseFloat(c.style.left), fy = parseFloat(c.style.top)
+    c.style.setProperty('--gx', (30 - fx).toFixed(0) + 'px')
+    c.style.setProperty('--gy', (22 - fy).toFixed(0) + 'px')
+    c.style.animationDelay = (i * 22) + 'ms'
+    c.classList.add('gone')
+    total += +c.dataset.v || 1
+    setTimeout(() => c.remove(), 700 + i * 22)
+  })
+  setTimeout(() => addPurse(total), 420)
 }
 function banner(t, c) { const b = el('div', 'banner-fx', t); b.style.color = c || '#fff'; pop(b) }
 // says, in plain words, what the boss just pulled — mechanics are useless if unreadable
@@ -1282,16 +1324,16 @@ function mechanic(title, body, koBody) {
   c.classList.remove('on'); void c.offsetWidth; c.classList.add('on')
 }
 function bubble(txt) {
+  $('#fx').querySelectorAll('.shout').forEach(n => n.remove())   // never stack speech
   at(el('div', 'shout', txt), clamp(bossCX(), 90, AR.w - 90), bossCY() - 70)
   Voice.say(txt)                                   // the boss actually says it out loud
 }
 // boss talks back: in-character line + pitched voice blips
-function talk(force) {
+function talk(force, line) {
   const now = performance.now()
   if (!force && now < G.talkAt) return
   G.talkAt = now + rnd(2200, 3600)
-  const line = pick(bossLines(G.boss))
-  bubble(line)
+  bubble(line || pick(bossLines(G.boss)))
 }
 function ouch() { bossEl.classList.add('ouch'); clearTimeout(ouchT); ouchT = setTimeout(() => bossEl.classList.remove('ouch'), 130) }
 function addMark(clientX, clientY, heavy) {
@@ -1333,7 +1375,7 @@ function floorStain(x) {
   s.style.top = (AR.ground + rnd(-4, 22)) + 'px'
   s.appendChild(pizzaNode('floor'))
   mess.appendChild(s)
-  while (mess.children.length > 14) mess.firstChild.remove()
+  const st = mess.querySelectorAll('.stain'); for (let i = 0; i < st.length - 12; i++) st[i].remove()
 }
 function pizzaMess(clientX, clientY) {
   const lx = (clientX - AR.left) - (bossCX() - 100)
@@ -1399,7 +1441,12 @@ function attack(e) {
   ouch(); addMark(e.clientX, e.clientY, w.hit !== 'light')
   dmgNum(x, y, dmg, crit ? 'crit' : w.id === 'whale' ? 'big' : '')
   bits(x, y, w.hit === 'light' ? 4 : 10)
-  coinBurst(x, y, clamp(Math.round(dmg / 7), 1, 9))
+  goldDrop(x, y, w.hit === 'light' ? 1 : 2, 1)
+  if (G.combo % 5 === 0) {                       // 5, 10, 15... consecutive clean hits
+    const coins = Math.min(14, 4 + Math.floor(G.combo / 5) * 2)
+    goldDrop(bossCX(), bossCY(), coins, 2)
+    banner('COMBO x' + G.combo + '  +' + coins * 2, '#ffe066')
+  }
   // combo raises the pitch of every hit — cheapest escalation there is
   Sound.play(w.sfx, 1 + Math.min(G.combo, 22) * .028)
   if (crit) {
@@ -1409,9 +1456,11 @@ function attack(e) {
     Sound.play('crack', 1.5)
   }
 
-  if (w.hit === 'light') { shake('s'); if (Math.random() < .12) talk() }
-  else if (w.hit === 'mid') { shake('m'); banner(w.shout, '#ffe066'); talk() }
-  else { shake('l'); flash(); banner(w.shout, w.hit === 'launch' ? '#7ef29a' : '#ffe066'); bubble(painWord()); setTimeout(() => talk(true), 620) }
+  if (w.hit === 'light') shake('s')
+  else if (w.hit === 'mid') { shake('m'); banner(w.shout, '#ffe066') }
+  else { shake('l'); flash(); banner(w.shout, w.hit === 'launch' ? '#7ef29a' : '#ffe066') }
+  // he speaks once every few hits, never twice on top of itself
+  if (--G.talkIn <= 0) { G.talkIn = Math.round(rnd(4, 6)); talk(true, Math.random() < .4 ? painWord() : null) }
   if (w.id === 'whale') pop(el('div', 'whalefly', '🐋'))
 
   const heavyish = w.hit === 'heavy' || w.hit === 'launch'
@@ -1499,8 +1548,8 @@ function startExit() {
   G.exitPrep = true                       // frozen in place while the camera watches him decide
   signature(1); bubble('brb')
   cutscene('EXIT SCAM',
-    'He just grabbed the bag and turned for the exit. When the bars lift, knock him back before he reaches the edge.',
-    '가방을 챙기고 출구로 돌아섰다. 검은 띠가 걷히면, 끝에 닿기 전에 쳐서 막아라.',
+    'Knock him back before he reaches the edge!',
+    '끝에 닿기 전에 쳐서 막아라!',
     2100, () => {
       G.exitPrep = false
       G.exit = 4.5
@@ -1560,8 +1609,8 @@ function die() {
     Sound.play('ko'); shake('l'); flash()
     whip(Math.random() < .5 ? 1 : -1, 900)       // sags like the fight is over
     cutscene('BALANCE SHEET',
-      'You emptied the bar and he is still standing. That number was never his health.',
-      '체력바를 다 비웠는데 아직 서 있다. 그 숫자는 애초에 그의 체력이 아니었다.',
+      'That bar was fake. This purple one is real.',
+      '아까 그 체력바는 가짜였다. 이 보라색이 진짜다.',
       2500)
     setTimeout(() => {                           // the reveal, mid-scene
       if (G.over || !G.boss || G.boss.id !== 'altruist') return
@@ -1596,7 +1645,7 @@ function physics(dt) {
     // follow the pointer, and derive velocity from that motion so the throw on release
     // is whatever the hand was doing — smoothed, or one jittery frame decides the throw
     const L0 = lim()
-    const nx = clamp(G.drag.tx, -L0, L0), ny = Math.min(0, G.drag.ty)
+    const nx = clamp(G.drag.tx, -L0, L0), ny = clamp(G.drag.ty, ceilY(), 0)
     G.drag.vx += ((nx - G.x) / dt - G.drag.vx) * .3
     G.drag.vy += ((ny - G.y) / dt - G.drag.vy) * .3
     G.vx = G.drag.vx; G.vy = G.drag.vy
@@ -1607,13 +1656,17 @@ function physics(dt) {
     G.y += G.vy * dt
   }
 
+  // ceiling: keep his head inside the arena so a big throw never parks him off screen
+  const CY = ceilY()
+  if (G.y < CY) { G.y = CY; if (G.vy < 0) { G.vy = -G.vy * .35; whip(Math.sign(G.vx) || 1, 300) } }
+
   const airborne = held || G.y < -1
   if (held) { /* the hand holds him up */ }
-  else if (airborne) G.vx *= Math.pow(.5, dt)
+  else if (airborne) G.vx *= Math.pow(.35, dt)
   else {
     G.y = 0
     if (G.vy > 320) {
-      G.vy = -G.vy * .42; G.vx *= .72
+      G.vy = -G.vy * .34; G.vx *= .6
       whip(Math.sign(G.vx) || 1, 260)
       dust(bossCX(), AR.ground + 6); Sound.play('thud'); shake('s')
     } else G.vy = 0
@@ -1716,9 +1769,10 @@ setInterval(() => {
   const now = performance.now()
   document.querySelectorAll('.wp').forEach(b => {
     const w = W(b.dataset.w)
-    const left = Math.max(G.cd[w.id] - now, G.lock - now)
-    b.querySelector('.cd').style.transform = 'scaleY(' + clamp(left / Math.min(w.cd, SWING_LOCK), 0, 1) + ')'
+    b.querySelector('.cd').style.transform = 'scaleY(' + clamp((G.cd[w.id] - now) / w.cd, 0, 1) + ')'
   })
+  // the shared swing lock dims the whole bar instead of sweeping six gauges at once
+  $('#weapons').classList.toggle('locked', now < G.lock)
 }, 60)
 
 /* ---- boot ---- */
