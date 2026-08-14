@@ -131,7 +131,9 @@ header{position:relative;z-index:5;display:flex;align-items:center;gap:9px;paddi
 /* ============ SKELETON RIG ============
    DOM nesting IS the bone hierarchy: a child bone inherits its parent's rotation.
    JS only writes rotate() per bone, so forward kinematics is free. */
-.boss{position:relative;width:200px;height:330px;--bodyh:330px;touch-action:manipulation}
+.boss{position:relative;width:200px;height:330px;--bodyh:330px;touch-action:none;cursor:grab}
+.boss.held{cursor:grabbing}
+.boss.held .shadow{opacity:.25}
 .boss .shadow{position:absolute;left:50%;bottom:-8px;width:150px;height:22px;margin-left:-75px;
   border-radius:50%;background:#00000038;will-change:transform,opacity}
 .bn{position:absolute}
@@ -685,6 +687,7 @@ const WEAPONS = [
   { id:'whale',  icon:'🐋', name:'WHALE DUMP',  dmg:150, cd:6000, stars:'★★★★★', hit:'launch', sfx:'whale', spark:'🌊', kick:1150, lift:1250, spin:900, shout:'WHALE ALERT!' },
 ]
 const PAIN = ['OUCH!', 'OW!', 'AAH!', 'STOP!', 'OOF!', 'MY BAGS!']
+const THROW_GAIN = 1.15, THROW_MAX = 2600   // how hard a flick throws him, and the ceiling
 const SWING_LOCK = 800   // ms you are committed after any swing, capped so the whale is still usable
 
 /* ================= LANGUAGE =================
@@ -1068,6 +1071,7 @@ const G = {
   coins: [], marks: {}, nMarks: 0,
   peg: 1, spiral: false, books: false, exit: 0, exitPrep: false,
   sigT: 0, sigAt: 0, purse: 0, lock: 0, cine: false,
+  drag: { on:false, id:-1, tx:0, ty:0, vx:0, vy:0, ox:0, oy:0 },
   x: 0, y: 0, vx: 0, vy: 0, prevVx: 0,
   tx: 0, moveT: 0, walk: 90, flee: 0, hitstop: 0, step: 0, bob: 0,
   talkAt: 0,
@@ -1141,6 +1145,7 @@ function start(i) {
     shield: 0, shieldUsed: false, marks: {}, nMarks: 0,
     peg: 1, spiral: false, books: false, exit: 0, exitPrep: false,
     sigT: 0, sigAt: 0, purse: 0, lock: 0, cine: false,
+    drag: { on:false, id:-1, tx:0, ty:0, vx:0, vy:0, ox:0, oy:0 },
     x: 0, y: 0, vx: 0, vy: 0, prevVx: 0,
     tx: 0, moveT: 1.2, flee: 0, hitstop: 0, step: 0, bob: 0, talkAt: 0,
     walk: b.id === 'speedrunner' ? 235 : 86,
@@ -1167,7 +1172,35 @@ function start(i) {
   const st = $('#stage'); st.innerHTML = ''
   puppet = el('div', 'puppet')
   bossEl = figure(b)
-  bossEl.addEventListener('pointerdown', e => { e.stopPropagation(); attack(e) })
+  bossEl.addEventListener('pointerdown', e => {
+    e.stopPropagation()
+    attack(e)                                   // grabbing still lands a hit: no wasted taps
+    if (G.over || G.cine) return
+    Object.assign(G.drag, { on:true, id:e.pointerId, tx:G.x, ty:G.y, vx:0, vy:0,
+      ox: (e.clientX - AR.left) - bossCX(), oy: (e.clientY - AR.top) - bossCY() })
+    try { bossEl.setPointerCapture(e.pointerId) } catch (_) {}   // keep tracking outside the body
+    bossEl.classList.add('held')
+  })
+  bossEl.addEventListener('pointermove', e => {
+    if (!G.drag.on || e.pointerId !== G.drag.id) return
+    G.drag.tx = (e.clientX - AR.left) - G.drag.ox - AR.w / 2
+    G.drag.ty = (e.clientY - AR.top) - G.drag.oy - AR.ground + BODY_H / 2
+  })
+  const letGo = e => {
+    if (!G.drag.on || (e && e.pointerId !== G.drag.id)) return
+    G.drag.on = false
+    bossEl.classList.remove('held')
+    G.vx = clamp(G.drag.vx * THROW_GAIN, -THROW_MAX, THROW_MAX)
+    G.vy = clamp(G.drag.vy * THROW_GAIN, -THROW_MAX, THROW_MAX)
+    const speed = Math.hypot(G.vx, G.vy)
+    if (speed > 260) {                           // a real throw, not a set-down
+      whip(Math.sign(G.vx) || 1, Math.min(1100, speed * .5))
+      G.flee = 0                                 // he is busy being airborne
+      if (speed > 1400) { Sound.play('whale', 1.4); shake('m') } else Sound.play('hit', .7)
+    }
+  }
+  bossEl.addEventListener('pointerup', letGo)
+  bossEl.addEventListener('pointercancel', letGo)
   puppet.appendChild(bossEl); st.appendChild(puppet)
   skel = makeSkeleton(bossEl)
   measure(); paintHp(); render()
@@ -1547,12 +1580,25 @@ function physics(dt) {
   if (G.hitstop > 0) { G.hitstop -= dt; return }
 
   G.prevVx = G.vx
-  G.vy += 2600 * dt
-  G.x += G.vx * dt
-  G.y += G.vy * dt
+  const held = G.drag.on
+  if (held) {
+    // follow the pointer, and derive velocity from that motion so the throw on release
+    // is whatever the hand was doing — smoothed, or one jittery frame decides the throw
+    const L0 = lim()
+    const nx = clamp(G.drag.tx, -L0, L0), ny = Math.min(0, G.drag.ty)
+    G.drag.vx += ((nx - G.x) / dt - G.drag.vx) * .3
+    G.drag.vy += ((ny - G.y) / dt - G.drag.vy) * .3
+    G.vx = G.drag.vx; G.vy = G.drag.vy
+    G.x = nx; G.y = ny
+  } else {
+    G.vy += 2600 * dt
+    G.x += G.vx * dt
+    G.y += G.vy * dt
+  }
 
-  const airborne = G.y < -1
-  if (airborne) G.vx *= Math.pow(.5, dt)
+  const airborne = held || G.y < -1
+  if (held) { /* the hand holds him up */ }
+  else if (airborne) G.vx *= Math.pow(.5, dt)
   else {
     G.y = 0
     if (G.vy > 320) {
@@ -1564,13 +1610,15 @@ function physics(dt) {
   }
 
   const L = lim()
-  if (G.x > L) { G.x = L; G.vx = -Math.abs(G.vx) * .5; whip(1, 420) }
-  if (G.x < -L) { G.x = -L; G.vx = Math.abs(G.vx) * .5; whip(-1, 420) }
+  if (!held) {
+    if (G.x > L) { G.x = L; G.vx = -Math.abs(G.vx) * .5; whip(1, 420) }
+    if (G.x < -L) { G.x = -L; G.vx = Math.abs(G.vx) * .5; whip(-1, 420) }
+  }
 
   // grounded locomotion — flee after a hit, otherwise wander, so aiming matters
   if (G.sigT > 0) { G.sigT -= dt; if (G.sigT <= 0) restorePose() }
   const settled = !airborne && Math.abs(G.vx) < 70
-  if (!G.over && settled && !G.exitPrep) {
+  if (!G.over && settled && !G.exitPrep && !held) {
     if (G.exit > 0) {                              // sprinting for the edge with the bag
       G.exit -= dt
       const dir = G.x >= 0 ? 1 : -1
