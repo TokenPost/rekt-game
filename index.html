@@ -145,24 +145,39 @@ header{position:relative;z-index:5;display:flex;align-items:center;gap:9px;paddi
    child, so head and arms (child bones) are never cut off by its overflow */
 .torso{left:calc(var(--tw) / -2);top:calc(var(--th) * -1);width:var(--tw);height:calc(var(--th) + 18px);
   transform-origin:50% 100%}
-.shirt{position:absolute;inset:0;border-radius:42px 42px 24px 24px;border:4px solid #241a4d;overflow:hidden;
+/* The shirt used to BE the torso, which is why every outfit looked painted on.
+   Now a bare body sits underneath and the garment is its own larger shape hanging
+   over it, with a collar, a hem and sleeves that end where fabric would end. */
+.body{position:absolute;inset:14px 12px 0;border-radius:34px 34px 18px 18px;
+  border:4px solid #241a4d;
+  background:linear-gradient(160deg,color-mix(in srgb,var(--skin) 100%,#fff 16%),var(--skin))}
+.shirt{position:absolute;left:-7px;right:-7px;top:16px;bottom:-7px;
+  border-radius:30px 30px 26px 26px;border:4px solid #241a4d;overflow:hidden;
   background:linear-gradient(155deg,color-mix(in srgb,var(--shirt) 100%,#fff 30%),var(--shirt) 46%,
     color-mix(in srgb,var(--shirt) 70%,#000 30%))}
+.hem{position:absolute;left:0;right:0;bottom:0;height:13px;
+  border-top:3px solid #00000038;background:color-mix(in srgb,var(--shirt) 72%,#000 28%)}
+.collar{position:absolute;left:50%;top:6px;width:54px;height:22px;margin-left:-27px;
+  border-radius:0 0 46% 46%;border:4px solid #241a4d;border-top:0;
+  background:color-mix(in srgb,var(--shirt) 78%,#000 22%)}
+.sleeve{position:absolute;left:-5px;right:-5px;top:-5px;height:58%;border-radius:16px 16px 12px 12px;
+  border:4px solid #241a4d;
+  background:linear-gradient(color-mix(in srgb,var(--shirt) 100%,#fff 20%),var(--shirt))}
 .shirt .logo{position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);font-size:42px;color:#ffffffcc;
   text-shadow:0 3px 0 #00000033}
 .shirt .shine{position:absolute;left:-10%;top:-30%;width:56%;height:150%;transform:rotate(18deg);
   background:linear-gradient(90deg,#ffffff44,#ffffff00)}
 .suit .shirt{background:linear-gradient(155deg,#ff6d7c,var(--shirt) 45%,#a8121f)}
-.suit .shirt::before{content:'';position:absolute;left:50%;top:-6px;width:54px;height:78px;transform:translateX(-50%);
+.suit .shirt::before{content:'';position:absolute;left:50%;top:-4px;width:58px;height:74px;transform:translateX(-50%);
   background:#fff;clip-path:polygon(50% 100%,0 0,100% 0)}
-.suit .shirt::after{content:'';position:absolute;left:50%;top:8px;width:15px;height:34px;transform:translateX(-50%);
+.suit .shirt::after{content:'';position:absolute;left:50%;top:10px;width:15px;height:34px;transform:translateX(-50%);
   background:#241a4d;clip-path:polygon(50% 0,100% 22%,72% 100%,28% 100%,0 22%)}
 .suit .shirt .logo{top:74%;font-size:28px}
 
 /* ball-jointed doll: every limb is its own piece with a visible rivet at the pivot */
 .arm,.fore,.leg,.shin{box-shadow:0 3px 0 #00000022}
 .arm{width:var(--armw);height:var(--uplen);border-radius:16px;border:4px solid #241a4d;transform-origin:50% 12%;
-  background:linear-gradient(color-mix(in srgb,var(--shirt) 100%,#fff 18%),color-mix(in srgb,var(--shirt) 74%,#000 26%))}
+  background:linear-gradient(color-mix(in srgb,var(--skin) 100%,#fff 14%),var(--skin))}
 .arm.l{left:calc(var(--armw) / -2 + 2px);top:16px}
 .arm.r{left:calc(var(--tw) - var(--armw) / 2 - 2px);top:16px}
 .fore{left:-4px;top:calc(var(--uplen) - 12px);width:var(--armw);height:var(--forelen);border-radius:16px;
@@ -263,16 +278,19 @@ header{position:relative;z-index:5;display:flex;align-items:center;gap:9px;paddi
 .afro{position:absolute;left:-30px;right:-30px;top:-52px;height:82px;
   border-radius:54% 54% 40% 40%;z-index:2;
   background:radial-gradient(circle at 34% 24%,color-mix(in srgb,var(--hair) 100%,#fff 28%),var(--hair) 74%);
-  border:4px solid #241a4d}
-.afro i{position:absolute;border-radius:50%;border:4px solid #241a4d;
-  background:radial-gradient(circle at 38% 30%,color-mix(in srgb,var(--hair) 100%,#fff 20%),var(--hair))}
+  /* a border on each lobe drew a closed ring around every ball. Stacked drop-shadows
+     trace the ALPHA of the whole group instead, so the mass gets ONE outline and the
+     lobes read as curls. The same trick outlines any merged silhouette. */
+  filter:drop-shadow(3px 0 0 #241a4d) drop-shadow(-3px 0 0 #241a4d)
+         drop-shadow(0 3px 0 #241a4d) drop-shadow(0 -3px 0 #241a4d)}
+.afro i{position:absolute;border-radius:50%;
+  background:radial-gradient(circle at 38% 30%,color-mix(in srgb,var(--hair) 100%,#fff 22%),var(--hair));
+  box-shadow:inset 0 -6px 0 #0000001a}
 .afro i:nth-child(1){left:-16px;top:42px;width:56px;height:56px}
 .afro i:nth-child(2){right:-16px;top:38px;width:58px;height:58px}
 .afro i:nth-child(3){left:6%;top:-20px;width:66px;height:66px}
 .afro i:nth-child(4){right:4%;top:-24px;width:60px;height:60px}
 .afro i:nth-child(5){left:35%;top:-30px;width:56px;height:56px}
-.afro::after{content:'';position:absolute;left:8%;right:8%;bottom:-6px;height:22px;
-  border-radius:0 0 50% 50%;background:#0000002e}
 .bare .shin{background:linear-gradient(color-mix(in srgb,var(--skin) 100%,#fff 12%),var(--skin))}
 .bare .leg{background:linear-gradient(160deg,#5b6480,#39415f)}
 /* ---- SQUID-style rug: anonymous dev, so the mask is the face ---- */
@@ -340,7 +358,7 @@ header{position:relative;z-index:5;display:flex;align-items:center;gap:9px;paddi
 @keyframes starspin{50%{transform:translateY(-5px) rotate(9deg)}}
 .sweat{display:none;position:absolute;right:-16px;top:6px;font-size:20px;z-index:8;animation:sweatdrop 1.1s ease-in infinite}
 @keyframes sweatdrop{0%{transform:translateY(0);opacity:0}25%{opacity:1}100%{transform:translateY(26px);opacity:0}}
-.ouch .skull,.ouch .shirt,.ouch .hood,.ouch .dogeskull,.ouch .snout{filter:brightness(1.75) saturate(.35)}
+.ouch .skull,.ouch .shirt,.ouch .sleeve,.ouch .collar,.ouch .hood,.ouch .dogeskull,.ouch .snout{filter:brightness(1.75) saturate(.35)}
 .ouch .mouth{transform:scaleY(2.1)}
 .ouch .lid{transform:scaleY(.5)}
 .ouch .brow.l{transform:rotate(26deg)}
@@ -365,12 +383,18 @@ header{position:relative;z-index:5;display:flex;align-items:center;gap:9px;paddi
 #purse.bump{transform:scale(1.3)}
 /* coins spill out of him, lie on the floor, then get swept into the purse in batches.
    They live in the floor layer, which is pointer-events:none, so they never eat a tap. */
-.gold{position:absolute;width:15px;height:15px;margin:-7px 0 0 -7px;border-radius:50%;
-  background:radial-gradient(circle at 36% 30%,#ffe680,#c2a633);border:3px solid #241a4d;
-  box-shadow:0 2px 0 #00000026;animation:goldfall .6s cubic-bezier(.3,.5,.5,1) both}
+.gold{position:absolute;width:23px;height:23px;margin:-11px 0 0 -11px;border-radius:50%;
+  display:grid;place-items:center;
+  background:radial-gradient(circle at 34% 28%,#ffeaa0,#f7d35f 54%,#dba91f 90%);
+  border:3px solid #241a4d;box-shadow:0 2px 0 #0000002e,inset 0 0 0 2px #fff3c07a;
+  animation:goldfall .58s cubic-bezier(.35,.5,.5,1) both}
+.gold::after{content:'₿';font-family:system-ui,sans-serif;font-weight:900;font-size:14px;
+  line-height:1;color:#241a4d}
 @keyframes goldfall{
-  0%{transform:translate(var(--sx),var(--sy)) scale(.4)}
-  40%{transform:translate(calc(var(--sx) * .4),calc(var(--sy) * .35 - 44px)) scale(1.1)}
+  0%{transform:translate(var(--sx),var(--sy)) scale(.5)}
+  40%{transform:translate(calc(var(--sx) * .42),calc(var(--sy) * .34 - 44px)) scale(1.03)}
+  70%{transform:translate(calc(var(--sx) * .08),0) scale(1.08,.9)}
+  86%{transform:translate(0,-6px) rotate(calc(var(--r) * .8))}
   100%{transform:translate(0,0) rotate(var(--r)) scale(1)}}
 .gold.gone{animation:goldgo .6s ease-in forwards}
 @keyframes goldgo{
@@ -902,6 +926,16 @@ const Sound = {
     else if (n === 'block') { this.tone('triangle', 300, 200, .09, .06) }
     else if (n === 'thud')  { this.tone('sine', 120, 40, .18, .16); this.noise(.1, .08, 300) }
     else if (n === 'miss')  { this.tone('triangle', 200, 340, .1, .05) }
+    else if (n === 'coins') {                       // combo payout: a bright jangle
+      for (let i = 0; i < 9; i++) {
+        const f = 1350 * (1 + i * .11) * rnd(.92, 1.09)
+        this.tone('triangle', f, f * .55, .14, .042, i * .036)
+      }
+      this.tone('sine', 560, 300, .28, .05, .04)
+    }
+    else if (n === 'cashin') {                      // sweeping the floor into the purse
+      for (let i = 0; i < 5; i++) this.tone('sine', 880 * (1 + i * .2), 660, .1, .032, i * .05)
+    }
   },
 }
 function paintSound() { const t = Sound.on ? '🔊' : '🔇'; $('#sound').textContent = t; $('#sound2').textContent = t }
@@ -1037,9 +1071,11 @@ function figure(b) {
   f.innerHTML = `<div class="shadow"></div>
     <div class="bn hip" data-b="hip">
       <div class="bn torso" data-b="torso">
-        <div class="shirt"><div class="shine"></div><div class="logo">${b.logo || ''}</div></div>
-        <div class="bn arm l" data-b="armL"><div class="bn fore" data-b="foreL"><div class="hand"></div></div></div>
-        <div class="bn arm r" data-b="armR"><div class="bn fore" data-b="foreR"><div class="hand"></div>${b.id === 'rug' ? '<div class="bag">💰</div>' : ''}</div></div>
+        <div class="body"></div>
+        <div class="shirt"><div class="shine"></div><div class="logo">${b.logo || ''}</div><div class="hem"></div></div>
+        <div class="collar"></div>
+        <div class="bn arm l" data-b="armL"><div class="sleeve"></div><div class="bn fore" data-b="foreL"><div class="hand"></div></div></div>
+        <div class="bn arm r" data-b="armR"><div class="sleeve"></div><div class="bn fore" data-b="foreR"><div class="hand"></div>${b.id === 'rug' ? '<div class="bag">💰</div>' : ''}</div></div>
         ${head}
       </div>
       <div class="bn leg l" data-b="legL"><div class="bn shin" data-b="shinL"></div></div>
@@ -1278,7 +1314,7 @@ function goldDrop(x, y, n, worth) {
     c.dataset.v = worth || 1
     mess.appendChild(c)
   }
-  if (mess.querySelectorAll('.gold:not(.gone)').length > 36) sweepGold()
+  if (mess.querySelectorAll('.gold:not(.gone)').length > 26) sweepGold()
   else if (!sweepTimer) sweepTimer = setTimeout(sweepGold, 2400)
 }
 function sweepGold() {
@@ -1295,6 +1331,7 @@ function sweepGold() {
     total += +c.dataset.v || 1
     setTimeout(() => c.remove(), 700 + i * 22)
   })
+  Sound.play('cashin')
   setTimeout(() => addPurse(total), 420)
 }
 function banner(t, c) { const b = el('div', 'banner-fx', t); b.style.color = c || '#fff'; pop(b) }
@@ -1446,6 +1483,7 @@ function attack(e) {
     const coins = Math.min(14, 4 + Math.floor(G.combo / 5) * 2)
     goldDrop(bossCX(), bossCY(), coins, 2)
     banner('COMBO x' + G.combo + '  +' + coins * 2, '#ffe066')
+    Sound.play('coins')
   }
   // combo raises the pitch of every hit — cheapest escalation there is
   Sound.play(w.sfx, 1 + Math.min(G.combo, 22) * .028)
