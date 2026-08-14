@@ -73,6 +73,11 @@ html[lang="ko"] #rekt .row button{font-size:16px}
   text-shadow:0 2px 0 #241a4d;margin:9px 0 14px}
 /* cards carry overflow:hidden, which lets a grid row squash them to nothing on short
    screens — pin the rows to their content and let the roster scroll instead */
+.stagebar{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:11px}
+.stagebar button{border:3px solid #241a4d;border-radius:999px;padding:6px 14px;font-size:14px;
+  letter-spacing:1px;background:#ffffffdd;color:#241a4d;box-shadow:0 4px 0 #241a4d44}
+.stagebar button.on{background:#ffd75e;box-shadow:0 4px 0 #241a4d}
+.stagebar button.locked{background:#ffffff88;color:#6a739a}
 .roster{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;gap:11px;
   align-content:start;grid-auto-rows:max-content;overflow:auto;padding-bottom:6px}
 .card{position:relative;border:4px solid #241a4d;border-radius:18px;padding:8px 8px 10px;text-align:center;
@@ -115,6 +120,47 @@ html[lang="ko"] #rekt .row button{font-size:16px}
 #shop .have{font-family:system-ui;font-weight:900;font-size:11px;color:#12a06e;letter-spacing:1px}
 #shop .close{display:block;width:100%;margin-top:6px;border:3px solid #241a4d;border-radius:13px;
   padding:11px;font-size:18px;background:#fff;box-shadow:0 5px 0 #241a4d}
+
+
+/* ================= STAGE: GROCERY ================= */
+.room.grocery{background:linear-gradient(#f3f6ff 0%,#e3e9f7 46%,#cfd8ee 100%)}
+.grocery .ceil{position:absolute;left:0;right:0;top:0;height:9%;background:linear-gradient(#dfe5f5,#c9d2e8);
+  border-bottom:5px solid #241a4d;display:flex;justify-content:space-around;align-items:center}
+.grocery .ceil i{width:64px;height:12px;border-radius:6px;background:#fff8c9;
+  border:3px solid #241a4d;box-shadow:0 0 22px #fff2a0}
+.grocery .shelf{position:absolute;left:0;right:0;height:15%;border-top:5px solid #241a4d;
+  background:linear-gradient(#c99a63,#9a6f3c);display:flex;align-items:flex-end;gap:7px;padding:0 10px 5px}
+.grocery .shelf i{flex:1;border-radius:4px;border:3px solid #241a4d}
+.grocery .aisle{position:absolute;left:6%;bottom:31%;width:88%;height:26%;
+  border:5px solid #241a4d;border-radius:8px;background:#b7c2da;
+  display:flex;flex-direction:column;justify-content:space-between}
+.grocery .floor2{position:absolute;left:0;right:0;bottom:0;height:31%;border-top:6px solid #241a4d;
+  background:repeating-conic-gradient(#eef1fa 0% 25%,#cdd5e9 0% 50%) 0 0/54px 54px}
+.grocery .sign{position:absolute;left:50%;top:13%;transform:translateX(-50%);padding:5px 16px;
+  border-radius:8px;background:#ffe066;color:#241a4d;border:4px solid #241a4d;
+  font-size:15px;letter-spacing:2px;box-shadow:0 5px 0 #241a4d55;white-space:nowrap}
+
+/* props: an egg carton and a pickle jar you can raid */
+.eggbox{width:74px;height:40px;border-radius:6px 6px 9px 9px;background:linear-gradient(#f0d8a8,#c79b58);
+  border:4px solid #241a4d;display:flex;justify-content:space-around;align-items:center;padding:0 5px}
+.eggbox b{width:16px;height:19px;border-radius:50%;background:#fffbf0;border:3px solid #241a4d}
+.picklejar{width:56px;height:74px;border-radius:9px 9px 14px 14px;
+  background:linear-gradient(100deg,#cfe9c0,#8fc47a 60%,#5f9a4d);border:4px solid #241a4d}
+.picklejar::before{content:'';position:absolute;left:-4px;right:-4px;top:-11px;height:16px;
+  border-radius:5px;background:#c94f3d;border:4px solid #241a4d}
+.picklejar b{position:absolute;left:9px;top:20px;width:14px;height:42px;border-radius:8px;
+  background:#4f8a3c;box-shadow:20px -6px 0 -1px #5f9a4d}
+/* thrown groceries and the mess they leave */
+.fling{position:absolute;z-index:6;pointer-events:none;animation:flingto var(--ft) cubic-bezier(.4,.1,.7,1) forwards}
+@keyframes flingto{0%{transform:translate(0,0) rotate(0) scale(.7)}
+  45%{transform:translate(calc(var(--fx) * .5),calc(var(--fy) * .35 - 70px)) rotate(220deg) scale(1.05)}
+  100%{transform:translate(var(--fx),var(--fy)) rotate(430deg) scale(.9)}}
+.egg{width:26px;height:32px;border-radius:50% 50% 48% 48%;background:#fffbf0;border:3px solid #241a4d}
+.pickle{width:18px;height:44px;border-radius:9px;background:linear-gradient(#7fb765,#3f7a2e);
+  border:3px solid #241a4d}
+.smear{position:absolute;border-radius:48% 52% 60% 40%;border:3px solid #00000026;
+  background:var(--sc);animation:markin .2s;transition:transform 2.2s cubic-bezier(.6,0,.9,.4);z-index:7}
+.smear.drip{transform:translateY(120px) rotate(18deg)}
 
 /* ============ GAME SHELL ============ */
 #game{position:relative;height:100%;display:flex;flex-direction:column}
@@ -480,6 +526,19 @@ header{position:relative;z-index:5;display:flex;align-items:center;gap:9px;paddi
          drop-shadow(0 8px 6px #0000003d)}
 #aim.hit .wpn{animation:wswing .22s cubic-bezier(.3,1.5,.5,1)}
 @keyframes wswing{45%{transform:translate(-50%,-10%) scale(1.14)}}
+/* swung weapons travel through an arc around the grip, not straight down */
+#aim.arc.hit .wpn{transform-origin:50% 9%;animation:warc .3s cubic-bezier(.22,.9,.32,1)}
+@keyframes warc{
+  0%{transform:translate(-50%,-50%) rotate(-82deg) scale(.94)}
+  20%{transform:translate(-50%,-50%) rotate(-64deg) scale(.97)}
+  62%{transform:translate(-50%,-46%) rotate(30deg) scale(1.08)}
+  100%{transform:translate(-50%,-50%) rotate(0deg) scale(1)}}
+.swoosh{position:absolute;left:0;top:0;width:150px;height:150px;margin:-75px 0 0 -75px;
+  border-radius:50%;border:8px solid transparent;border-top-color:#ffffffd9;
+  border-right-color:#ffffff66;opacity:0;pointer-events:none}
+#aim.arc.hit .swoosh{animation:swoosh .3s ease-out}
+@keyframes swoosh{0%{opacity:0;transform:rotate(-150deg) scale(.62)}
+  30%{opacity:.95}100%{opacity:0;transform:rotate(34deg) scale(1.18)}}
 /* thrown weapons are held small and cocked back, then leave the hand on release */
 #aim.throwable .wpn{transform:translate(-50%,-50%) scale(.62) rotate(-24deg)}
 #aim.tossed .wpn{animation:wtoss .38s ease-in forwards}
@@ -750,6 +809,7 @@ footer.locked .wp{opacity:.55}
     <div class="wrap">
       <div class="logo">REKT</div>
       <div class="tag" id="tagline">BEAT THE CRYPTO BOSSES</div>
+      <div class="stagebar" id="stagebar"></div>
       <div class="roster" id="roster"></div>
       <div class="hint" id="hintline">PICK A BOSS · CHASE · HIT</div>
     </div>
@@ -929,6 +989,8 @@ const UI = {
   owned:    { en:'OWNED', ko:'보유중' },
   close:    { en:'CLOSE', ko:'닫기' },
   locked:   { en:'Locked — earn coins by fighting', ko:'잠김 — 싸워서 코인을 모으세요' },
+  stages:   { en:'STAGES', ko:'스테이지' },
+  weapons:  { en:'WEAPONS', ko:'무기' },
 }
 const KO = {
   bosses: {
@@ -975,13 +1037,19 @@ const KO = {
    that touches the floor (landing, dust, stains, coin spawns, the stage anchor)
    reads it from here, so a new background is a data entry, not a hunt through code. */
 const THEMES = {
-  arena: { id:'arena', ground:.85, sun:'₿', banner:'TO THE MOON ARENA', props:['raincloud'] },
+  arena:   { id:'arena', ground:.85, kind:'arena', props:['raincloud'],
+             name:{ en:'TO THE MOON ARENA', ko:'투 더 문 아레나' }, sun:'₿', banner:'TO THE MOON ARENA' },
+  grocery: { id:'grocery', ground:.82, kind:'grocery', props:['eggbox','picklejar'],
+             name:{ en:'GROCERY', ko:'마트' }, banner:'AISLE 7 — EGGS & PICKLES' },
 }
 let theme = THEMES.arena
 function applyTheme(name) {
   theme = THEMES[name] || THEMES.arena
   document.documentElement.style.setProperty('--stage-bottom', ((1 - theme.ground) * 100).toFixed(2) + '%')
-  buildRoom($('#room1')); buildRoom($('#room2'))
+  // the menu keeps one calm backdrop; only the arena follows the purchased stage,
+  // otherwise shelves and signs sit under the roster and nothing is readable
+  buildRoom($('#room1'), THEMES.arena)
+  buildRoom($('#room2'), theme)
   measure()
 }
 
@@ -1158,20 +1226,33 @@ function stepJoint(j, dt) {
    and the reason there is no leaderboard. */
 const FREE_WEAPONS = ['candle', 'bat', 'hammer', 'pizza']
 const PRICES = { doge: 600, whale: 900 }
+const STAGE_PRICES = { grocery: 1200 }
 const Save = {
-  coins: 0, owned: FREE_WEAPONS.slice(),
+  coins: 0, owned: FREE_WEAPONS.slice(), stages: ['arena'], stage: 'arena',
   load() {
     try {
       const raw = JSON.parse(localStorage.getItem('rekt.save') || '{}')
       this.coins = Math.max(0, raw.coins | 0)
       const own = Array.isArray(raw.owned) ? raw.owned : []
       this.owned = [...new Set([...FREE_WEAPONS, ...own.filter(id => PRICES[id])])]
+      const st = Array.isArray(raw.stages) ? raw.stages : []
+      this.stages = [...new Set(['arena', ...st.filter(id => STAGE_PRICES[id])])]
+      this.stage = this.stages.includes(raw.stage) ? raw.stage : 'arena'
     } catch (_) { /* corrupt save: start clean rather than crash into a blank screen */ }
   },
   save() {
-    try { localStorage.setItem('rekt.save', JSON.stringify({ coins: this.coins, owned: this.owned })) } catch (_) {}
+    try {
+      localStorage.setItem('rekt.save', JSON.stringify(
+        { coins: this.coins, owned: this.owned, stages: this.stages, stage: this.stage }))
+    } catch (_) {}
   },
   has(id) { return this.owned.includes(id) },
+  hasStage(id) { return this.stages.includes(id) },
+  buyStage(id) {
+    const price = STAGE_PRICES[id]
+    if (!price || this.hasStage(id) || this.coins < price) return false
+    this.coins -= price; this.stages.push(id); this.stage = id; this.save(); return true
+  },
   buy(id) {
     const price = PRICES[id]
     if (!price || this.has(id) || this.coins < price) return false
@@ -1186,10 +1267,40 @@ function paintPurse() {
   const sb = $('#shopbtn b'); if (sb) sb.textContent = n
   const bal = $('#shopbal'); if (bal) bal.textContent = n
 }
+function stageName(id) { const th = THEMES[id]; return (th.name && th.name[lang]) || th.name.en }
+function buildStages() {
+  const bar = $('#stagebar'); if (!bar) return
+  bar.innerHTML = ''
+  Object.keys(THEMES).forEach(id => {
+    const owned = Save.hasStage(id)
+    const b = el('button', (Save.stage === id ? 'on ' : '') + (owned ? '' : 'locked'),
+      stageName(id) + (owned ? '' : '  🔒 ' + STAGE_PRICES[id]))
+    b.onclick = () => {
+      if (!owned) { Sound.boot(); buildShop(); $('#shop').classList.add('on'); return }
+      Save.stage = id; Save.save(); applyTheme(id); buildStages()
+    }
+    bar.appendChild(b)
+  })
+}
 function buildShop() {
   $('#shoptitle').textContent = t('shop')
   $('#shopclose').textContent = t('close')
   const list = $('#shoplist'); list.innerHTML = ''
+  Object.keys(STAGE_PRICES).forEach(id => {
+    const owned = Save.hasStage(id), afford = Save.coins >= STAGE_PRICES[id]
+    const th = THEMES[id]
+    const row = el('div', 'row')
+    row.innerHTML = `<div class="art" style="font-size:30px;display:grid;place-items:center">🏬</div>
+      <div class="meta"><b>${stageName(id)}</b><span>${t('stages')} · ${owned ? t('owned') : '🪙 ' + STAGE_PRICES[id]}</span></div>`
+    if (owned) row.appendChild(el('div', 'have', t('owned')))
+    else {
+      const b = el('button', 'buy', t('buy'))
+      b.disabled = !afford
+      b.onclick = () => { if (Save.buyStage(id)) { Sound.play('coins'); applyTheme(id); paintPurse(); buildShop(); buildStages() } }
+      row.appendChild(b)
+    }
+    list.appendChild(row)
+  })
   WEAPONS.filter(w => PRICES[w.id]).forEach(w => {
     const owned = Save.has(w.id), afford = Save.coins >= PRICES[w.id]
     const row = el('div', 'row')
@@ -1217,6 +1328,7 @@ function buildShop() {
    Follows the pointer and rotates so the striking end points at the boss. Each piece
    of art is drawn with its business end downward, so the rotation is just the angle
    to the boss minus 90 degrees. */
+const SWUNG = ['bat', 'hammer']    // these travel through an arc
 const AIM_ART = {
   candle: 'w-candle:2', bat: 'w-bat:5', hammer: 'w-hammer:2',
   doge: 'w-doge:11', pizza: 'pizza', whale: 'w-whale:4',
@@ -1225,6 +1337,7 @@ function buildAim() {
   const a = $('#aim'); if (!a) return
   a.innerHTML = ''
   a.classList.toggle('throwable', !!W(G.weapon).splat)
+  a.classList.toggle('arc', SWUNG.includes(G.weapon))
   const spec = AIM_ART[G.weapon]
   if (!spec) return
   if (spec === 'pizza') {
@@ -1237,6 +1350,7 @@ function buildAim() {
     return
   }
   const [cls, n] = spec.split(':')
+  if (SWUNG.includes(G.weapon)) a.appendChild(el('div', 'swoosh'))
   a.appendChild(el('div', 'wpn ' + cls, '<i></i>'.repeat(+n)))
 }
 function moveAim(clientX, clientY) {
@@ -1268,10 +1382,53 @@ function scheduleProp() {
   clearTimeout(propTimer)
   propTimer = setTimeout(() => { spawnProp(); scheduleProp() }, rnd(19000, 30000))
 }
+/* Grocery props sit on the shelves rather than drifting. Tap one and it flings a
+   grocery at the boss: no damage, just a mess that sticks to him and then the floor. */
+function flingAt(fromX, fromY, cls, color) {
+  const f = el('div', 'fling ' + cls)
+  f.style.left = fromX + 'px'; f.style.top = fromY + 'px'
+  const tx = bossCX() + rnd(-30, 30), ty = bossCY() + rnd(-40, 40)
+  f.style.setProperty('--fx', (tx - fromX).toFixed(0) + 'px')
+  f.style.setProperty('--fy', (ty - fromY).toFixed(0) + 'px')
+  f.style.setProperty('--ft', '.45s')
+  $('#fx').appendChild(f)
+  setTimeout(() => {
+    f.remove()
+    if (G.over || !bossEl) return
+    spark(tx, ty, cls === 'egg' ? '🥚' : '🥒')
+    shake('s'); Sound.play('splat')
+    smearOn(tx, ty, color)
+  }, 450)
+}
+function smearOn(ax, ay, color) {
+  const lx = ax - (bossCX() - 100), ly = ay - (bossCY() - BODY_H / 2)
+  const m = el('i', 'smear')
+  const w = rnd(30, 52)
+  m.style.setProperty('--sc', color)
+  m.style.width = w.toFixed(0) + 'px'
+  m.style.height = (w * .72).toFixed(0) + 'px'
+  m.style.left = clamp(lx / 200 * 100, 10, 84) + '%'
+  m.style.top = clamp(ly / BODY_H * 100, 8, 62) + '%'
+  bossEl.querySelector('.marks').appendChild(m)
+  setTimeout(() => m.classList.add('drip'), 450)
+  setTimeout(() => {
+    m.remove()
+    const p = el('div', 'puddle')
+    const pw = rnd(40, 70)
+    p.style.width = pw.toFixed(0) + 'px'
+    p.style.background = color
+    p.style.left = (clamp(bossCX() + rnd(-40, 40), 30, AR.w - 30) - pw / 2).toFixed(0) + 'px'
+    p.style.top = (AR.ground + rnd(0, 20)).toFixed(0) + 'px'
+    $('#mess').appendChild(p)
+    const all = $('#mess').querySelectorAll('.puddle')
+    for (let i = 0; i < all.length - 8; i++) all[i].remove()
+  }, 2700)
+}
 function spawnProp() {
   if (G.over || !theme.props || !theme.props.length) return
   if ($('#props').children.length >= 2) return       // never crowd the sky
   const kind = pick(theme.props)
+  if (kind === 'eggbox' || kind === 'picklejar') return spawnShelfProp(kind)
   if (kind !== 'raincloud') return
   const p = el('div', 'prop raincloud')
   const w = 96, dist = AR.w + w + 40
@@ -1284,6 +1441,27 @@ function spawnProp() {
   p.addEventListener('animationend', () => p.remove())
   $('#props').appendChild(p)
 }
+
+function spawnShelfProp(kind) {
+  const p = el('div', 'prop ' + kind, '<b></b><b></b><b></b>')
+  const x = rnd(40, AR.w - 110), y = AR.h * (kind === 'eggbox' ? .30 : .52)
+  p.style.left = x.toFixed(0) + 'px'
+  p.style.top = y.toFixed(0) + 'px'
+  p.style.animation = 'none'                       // shelf stock does not drift
+  let left = kind === 'eggbox' ? 3 : 3
+  p.addEventListener('pointerdown', e => {
+    e.stopPropagation()
+    if (left <= 0) return
+    left--
+    flingAt(x + 30, y + 16, kind === 'eggbox' ? 'egg' : 'pickle',
+      kind === 'eggbox' ? '#f6e6a8cc' : '#7fb765cc')
+    if (kind === 'eggbox') { const b = p.querySelector('b'); if (b) b.remove() }
+    if (left <= 0) { p.style.opacity = '.35'; setTimeout(() => p.remove(), 2600) }
+  })
+  $('#props').appendChild(p)
+  setTimeout(() => { if (p.isConnected && left > 0) p.remove() }, 22000)
+}
+
 function burstRain(cloud) {
   if (cloud.classList.contains('dark')) return
   cloud.classList.add('dark')
@@ -1452,10 +1630,12 @@ function makeSkeleton(fig) {
 }
 
 /* ================= BACKGROUND ================= */
-function buildRoom(root) {
-  root.innerHTML = `<div class="rays"></div><div class="sun">${theme.sun}</div>
+function buildRoom(root, th) {
+  root.className = 'room ' + th.kind
+  if (th.kind === 'grocery') return buildGrocery(root, th)
+  root.innerHTML = `<div class="rays"></div><div class="sun">${th.sun}</div>
     <div class="skyline"></div><div class="floor"></div><div class="mat"></div>
-    <div class="banner">${theme.banner}</div>`
+    <div class="banner">${th.banner}</div>`
   const sky = root.querySelector('.skyline')
   ;[46, 72, 34, 88, 58, 96, 40, 78, 30, 66, 84, 50].forEach((h, i) => {
     const c = el('i'); if (i % 3 === 1) c.className = 'd'; c.style.height = h + '%'; sky.appendChild(c)
@@ -1471,6 +1651,19 @@ function buildRoom(root) {
     root.appendChild(f)
   })
 }
+
+function buildGrocery(root, th) {
+  const box = ['#e05c5c','#5c8fe0','#e0c25c','#7fc46a','#c47fd8','#e0925c']
+  const shelf = (top) => `<div class="shelf" style="top:${top}%">` +
+    Array.from({ length: 7 }, (_, i) =>
+      `<i style="height:${34 + (i * 13) % 46}px;background:${box[(i + top) % 6]}"></i>`).join('') + '</div>'
+  root.innerHTML = `
+    <div class="ceil"><i></i><i></i><i></i><i></i></div>
+    ${shelf(16)}${shelf(38)}
+    <div class="sign">${th.banner}</div>
+    <div class="floor2"></div>`
+}
+
 /* ================= STATE ================= */
 const G = {
   boss: null, hp: 0, max: 0, weapon: 'candle', over: false,
@@ -1535,7 +1728,7 @@ function applyLang() {
   $('#peg').querySelector('span').textContent = t('peg')
   const l = ko() ? 'EN' : '한'
   $('#lang').textContent = l; $('#lang2').textContent = l
-  buildRoster(); buildWeapons(); paintPurse()
+  buildRoster(); buildWeapons(); buildStages(); paintPurse()
   if ($('#shop').classList.contains('on')) buildShop()
   if (G.boss) $('#bname').textContent = bossName(G.boss)
 }
@@ -2186,7 +2379,7 @@ setInterval(() => {
 }, 60)
 
 /* ---- boot ---- */
-applyTheme('arena')   // must follow AR: it calls measure()
+applyTheme(Save.stage)   // must follow AR: it calls measure()
 $('#lang').onclick = toggleLang
 $('#lang2').onclick = toggleLang
 $('#shopbtn').onclick = () => { Sound.boot(); buildShop(); $('#shop').classList.add('on') }
