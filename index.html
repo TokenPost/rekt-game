@@ -134,8 +134,8 @@ html[lang="ko"] #rekt .row button{font-size:16px}
   border-bottom:5px solid #241a4d;display:flex;justify-content:space-around;align-items:center}
 .grocery .ceil i{width:64px;height:12px;border-radius:6px;background:#fff8c9;
   border:3px solid #241a4d;box-shadow:0 0 22px #fff2a0}
-.grocery .shelf{position:absolute;left:0;right:0;height:15%;border-top:5px solid #241a4d;
-  background:linear-gradient(#c99a63,#9a6f3c);display:flex;align-items:flex-end;gap:7px;padding:0 10px 5px}
+.grocery .shelf{position:absolute;left:0;right:0;height:13%;border-top:5px solid #241a4d;
+  background:linear-gradient(#c99a63,#9a6f3c);display:flex;align-items:flex-end;gap:1px;padding:0 5px 5px}
 .grocery .shelf i{flex:1;display:flex;align-items:flex-end;justify-content:center}
 .grocery .fixtures{position:absolute;left:0;right:0;bottom:31%;height:36%;pointer-events:none}
 .grocery .fixtures span{position:absolute;bottom:0}
@@ -161,6 +161,21 @@ html[lang="ko"] #rekt .row button{font-size:16px}
   border-radius:5px;background:#c94f3d;border:4px solid #241a4d}
 .picklejar b{position:absolute;left:9px;top:20px;width:14px;height:42px;border-radius:8px;
   background:#4f8a3c;box-shadow:20px -6px 0 -1px #5f9a4d}
+/* fixtures you can actually use */
+.p-fridge,.p-cart{filter:drop-shadow(0 4px 0 #00000018)}
+.p-fridge.open{animation:fridgepop .5s}
+@keyframes fridgepop{40%{transform:scale(1.05,.95)}}
+.p-cart.roll{animation:cartroll .55s cubic-bezier(.4,0,.7,1) forwards}
+@keyframes cartroll{to{transform:translateX(var(--cx)) rotate(8deg)}}
+.p-cart.spent,.p-fridge.spent{opacity:.35}
+.frost{position:absolute;pointer-events:none;z-index:6;width:16px;height:16px;
+  background:#bfe6ff;clip-path:polygon(50% 0,61% 35%,100% 35%,68% 57%,79% 100%,50% 72%,21% 100%,32% 57%,0 35%,39% 35%);
+  animation:frostfall .9s linear forwards}
+@keyframes frostfall{to{transform:translateY(var(--ff)) rotate(200deg);opacity:0}}
+/* frozen: pale, stiff, slower */
+.frozen .skull,.frozen .shirt,.frozen .hood,.frozen .dogeskull,.frozen .snout,.frozen .afro,.frozen .sleeve{
+  filter:saturate(.25) brightness(1.25) hue-rotate(170deg)}
+.frozen{animation:shiver .09s infinite}
 /* thrown groceries and the mess they leave */
 .fling{position:absolute;z-index:6;pointer-events:none;animation:flingto var(--ft) cubic-bezier(.4,.1,.7,1) forwards}
 @keyframes flingto{0%{transform:translate(0,0) rotate(0) scale(.7)}
@@ -1085,7 +1100,7 @@ const KO = {
 const THEMES = {
   arena:   { id:'arena', ground:.85, kind:'arena', props:['raincloud'],
              name:{ en:'TO THE MOON ARENA', ko:'투 더 문 아레나' }, sun:'₿', banner:'TO THE MOON ARENA' },
-  grocery: { id:'grocery', ground:.82, kind:'grocery', props:['eggbox','picklejar'],
+  grocery: { id:'grocery', ground:.82, kind:'grocery', props:['eggbox','picklejar','fridge','cart'],
              name:{ en:'GROCERY', ko:'마트' }, banner:'AISLE 7 — EGGS & PICKLES' },
   floor:   { id:'floor', ground:.84, kind:'floor', props:['screen'],
              name:{ en:'TRADING FLOOR', ko:'트레이딩 플로어' }, banner:'MARGIN CALL' },
@@ -1443,70 +1458,155 @@ function strikeAim(toss) {
 
 
 /* ================= SVG PROP LIBRARY =================
-   CSS border-radius can only make rounded rectangles and ellipses, which is why
-   shop shelves and appliances read as coloured boxes. Anything with a real
-   silhouette is drawn here instead; flat fields (floors, walls, gradients) stay CSS.
-   Same visual language either way: one ink outline, flat fill, no texture. */
+   Objects with a real silhouette are drawn here; flat fields (floors, walls,
+   gradients) stay CSS. Three rules keep it from looking machine-stamped:
+   contours are bezier curves rather than rects and circles, the outer line is
+   heavier than interior detail so the eye reads shape first, and nothing is
+   perfectly symmetrical. */
 const INK = '#241a4d'
+const OUT_W = 4.5, DET_W = 2
 function svgArt(vb, body, opts) {
   const o = opts || {}
-  return `<svg viewBox="${vb}" ${o.w ? `width="${o.w}"` : ''} ${o.h ? `height="${o.h}"` : ''}
-    preserveAspectRatio="${o.par || 'xMidYMax meet'}" xmlns="http://www.w3.org/2000/svg"
-    style="display:block;overflow:visible">
-    <g fill="none" stroke="${INK}" stroke-width="${o.sw || 6}"
-       stroke-linejoin="round" stroke-linecap="round">${body}</g></svg>`
+  const tf = o.tilt ? `;transform:rotate(${o.tilt}deg)` : ''
+  return `<svg viewBox="${vb}" ${o.h ? `height="${o.h}"` : ''} preserveAspectRatio="xMidYMax meet"
+    xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible${tf}">
+    <g stroke="${INK}" stroke-linejoin="round" stroke-linecap="round">${body}</g></svg>`
 }
-/* grocery furniture — each reads at a glance because the outline follows the object */
+const oP = (d, f) => `<path d="${d}" fill="${f}" stroke-width="${OUT_W}"/>`
+const dP = (d, f, w) => `<path d="${d}" fill="${f || 'none'}" stroke-width="${w || DET_W}"/>`
+const sh = d => `<path d="${d}" fill="#00000020" stroke="none"/>`
+
+const VB = {
+  chips:'0 0 58 82', milk:'0 0 54 78', bread:'0 0 70 56', fishcan:'0 0 64 44',
+  grapepack:'0 0 56 72', juice:'0 0 48 86', cereal:'0 0 56 76', eggs:'0 0 66 44',
+  soda:'0 0 42 66', jam:'0 0 50 66', noodle:'0 0 60 54', choco:'0 0 54 72',
+  fridge:'0 0 96 142', till:'0 0 124 112', cart:'0 0 150 120',
+  cloud:'0 0 92 62', coin2:'0 0 60 60', gem:'0 0 72 62', rocket:'0 0 52 72', chart:'0 0 72 62',
+}
 const ART = {
-  cart: `<path d="M6 14h20l12 26"/>
-    <path d="M40 40h96l-16 46H58Z" fill="#ff9f43"/>
-    <path d="M64 50l-4 28M86 48l-2 30M108 48v30" stroke-width="4.5" opacity=".5"/>
-    <circle cx="70" cy="104" r="9" fill="#3b3550"/><circle cx="112" cy="104" r="9" fill="#3b3550"/>`,
-  fridge: `<rect x="6" y="6" width="80" height="128" rx="12" fill="#e6ecfa"/>
-    <path d="M6 54h80"/>
-    <rect x="64" y="22" width="9" height="20" rx="4.5" fill="${INK}"/>
-    <rect x="64" y="66" width="9" height="28" rx="4.5" fill="${INK}"/>`,
-  till: `<rect x="10" y="46" width="98" height="56" rx="9" fill="#7ec6a5"/>
-    <rect x="28" y="6" width="58" height="40" rx="7" fill="#e6ecfa"/>
-    <path d="M38 20h36M38 31h22" stroke-width="4.5" opacity=".5"/>
-    <g fill="${INK}" stroke="none">
-      <circle cx="32" cy="66" r="4.5"/><circle cx="50" cy="66" r="4.5"/><circle cx="68" cy="66" r="4.5"/>
-      <circle cx="32" cy="84" r="4.5"/><circle cx="50" cy="84" r="4.5"/><circle cx="68" cy="84" r="4.5"/></g>
-    <rect x="84" y="62" width="20" height="26" rx="5" fill="#f0c33c"/>`,
-  bottle: `<path d="M16 8h12v14l8 12v40a6 6 0 0 1-6 6H14a6 6 0 0 1-6-6V34l8-12Z" fill="#7fc46a"/>
-    <path d="M8 46h28" stroke-width="4"/>`,
-  can: `<rect x="6" y="10" width="32" height="46" rx="5" fill="#e05c5c"/>
-    <path d="M6 22h32" stroke-width="4"/><ellipse cx="22" cy="12" rx="16" ry="5" fill="#d8dce8"/>`,
-  cereal: `<rect x="6" y="6" width="38" height="58" rx="4" fill="#e0c25c"/>
-    <path d="M14 20h22M14 30h14" stroke-width="4" opacity=".55"/>`,
-  jar: `<rect x="8" y="16" width="34" height="46" rx="7" fill="#8fc47a"/>
-    <rect x="4" y="6" width="42" height="12" rx="4" fill="#c94f3d"/>
-    <path d="M16 26v26M28 24v28" stroke-width="5" stroke-linecap="round" opacity=".7"/>`,
-  milk: `<path d="M8 26 20 8h12l12 18v38a5 5 0 0 1-5 5H13a5 5 0 0 1-5-5Z" fill="#eef3ff"/>
-    <path d="M8 34h36" stroke-width="4" opacity=".5"/>`,
-  banana: `<path d="M8 12c4 30 26 46 52 44-14 10-44 4-52-14Z" fill="#f0d24a"/>`,
-  /* arena scenery — emoji rendered differently on every OS and clashed with the
-     drawn characters, so the sky is drawn too now */
-  cloud: `<path d="M22 54a18 18 0 0 1 3-35 24 24 0 0 1 45-7 20 20 0 0 1 14 42Z" fill="#fff"/>`,
-  coin2: `<circle cx="30" cy="30" r="24" fill="#f5cd55"/>
-    <circle cx="30" cy="30" r="16" fill="none" stroke-width="4" opacity=".45"/>
-    <path d="M30 16v28M24 22h10a6 6 0 0 1 0 12H24m0 0h11a6 6 0 0 1 0 12H24" stroke-width="4"/>`,
-  gem: `<path d="M8 24 22 6h28l14 18-28 34Z" fill="#7fd8f2"/>
-    <path d="M8 24h56M22 6l14 18M50 6 36 24M36 24v34" stroke-width="4" opacity=".55"/>`,
-  rocket: `<path d="M26 6c12 8 18 22 18 38l-8 12H16l-8-12C8 28 14 14 26 6Z" fill="#eef3ff"/>
-    <circle cx="26" cy="30" r="8" fill="#7fd8f2"/>
-    <path d="M16 44 4 58l12-2M36 44l12 14-12-2" fill="#e05c5c"/>
-    <path d="M20 56h12l-6 14Z" fill="#f0a73c"/>`,
-  chart: `<path d="M8 56h56" stroke-width="5"/>
-    <rect x="14" y="34" width="10" height="22" fill="#16c784"/>
-    <rect x="30" y="22" width="10" height="34" fill="#16c784"/>
-    <rect x="46" y="12" width="10" height="44" fill="#ea3943"/>`,
+  chips:
+    oP('M13 20 C7 33 6 52 9 65 C11 75 20 78 29 78 C40 78 49 73 50 62 C53 47 51 31 46 20 Z', '#e2632c') +
+    sh('M36 22 C41 34 43 50 41 63 C40 72 35 76 29 78 C40 78 49 73 50 62 C53 47 51 31 46 20 Z') +
+    dP('M13 20 Q19 12 25 18 Q31 11 37 17 Q43 11 46 20', 'none', 3.4) +
+    dP('M16 40 C24 34 34 34 43 39', '#f7d488', 3) +
+    dP('M19 53 C26 48 34 48 41 52', 'none', 2.2),
+  milk:
+    oP('M11 30 C11 25 15 16 21 10 C25 5 31 5 35 10 C41 16 45 25 45 30 L45 68 C45 73 41 75 36 75 L19 75 C14 75 11 73 11 68 Z', '#f0f5ff') +
+    sh('M36 12 C41 18 45 25 45 30 L45 68 C45 73 41 75 36 75 L30 75 C36 70 38 60 38 46 C38 32 37 20 36 12 Z') +
+    dP('M13 39 C23 35 34 35 43 39', '#6f9de8', 4) +
+    dP('M27 50 C31 57 34 61 34 65 C34 70 30 73 27 73 C23 73 20 70 20 65 C20 61 23 57 27 50 Z', '#6f9de8', 2.6),
+  bread:
+    oP('M7 46 C4 31 13 13 35 13 C57 13 65 31 63 46 C63 50 60 51 56 51 L14 51 C10 51 7 50 7 46 Z', '#e8b96a') +
+    sh('M48 15 C58 21 64 33 63 46 C63 50 60 51 56 51 L40 51 C50 45 52 28 48 15 Z') +
+    dP('M21 25 C24 20 28 20 31 25', 'none', 2.4) +
+    dP('M35 22 C38 17 42 17 45 22', 'none', 2.4) +
+    dP('M48 26 C51 21 55 22 57 27', 'none', 2.4),
+  fishcan:
+    oP('M8 22 C8 11 21 6 32 6 C43 6 57 11 57 22 C57 33 43 38 32 38 C21 38 8 33 8 22 Z', '#5f92e2') +
+    sh('M44 8 C52 12 57 16 57 22 C57 33 43 38 32 38 C40 33 46 22 44 8 Z') +
+    dP('M16 20 C22 12 34 12 41 20 C34 28 22 28 16 20 Z', '#eef3ff', 2.6) +
+    dP('M41 20 C45 17 49 18 51 20 C49 23 45 24 41 20 Z', '#eef3ff', 2.4),
+  grapepack:
+    oP('M11 20 C10 15 14 12 20 12 L38 12 C44 12 47 16 46 21 L45 60 C45 66 41 68 36 68 L20 68 C15 68 12 66 12 60 Z', '#8f5cc6') +
+    sh('M38 13 C44 13 47 16 46 21 L45 60 C45 66 41 68 36 68 L28 68 C36 60 39 36 38 13 Z') +
+    dP('M14 17 C24 14 34 14 44 17', '#efe3ff', 3) +
+    `<g fill="#4b2570" stroke-width="2.2">
+      <path d="M18 36 C15 33 16 29 20 29 C24 29 25 33 22 36 C21 37 19 37 18 36Z"/>
+      <path d="M30 34 C27 31 28 27 32 27 C36 27 37 31 34 34 C33 35 31 35 30 34Z"/>
+      <path d="M24 46 C21 43 22 39 26 39 C30 39 31 43 28 46 C27 47 25 47 24 46Z"/>
+      <path d="M36 45 C33 42 34 38 38 38 C42 38 43 42 40 45 C39 46 37 46 36 45Z"/>
+      <path d="M30 56 C27 53 28 49 32 49 C36 49 37 53 34 56 C33 57 31 57 30 56Z"/></g>` +
+    dP('M32 27 C33 22 31 19 28 17', 'none', 2.2),
+  juice:
+    oP('M19 9 C19 6 21 5 24 5 C27 5 29 6 29 9 L29 20 C33 25 38 31 38 38 L38 72 C38 78 34 80 28 80 L20 80 C14 80 10 78 10 72 L10 38 C10 31 15 25 19 20 Z', '#f2a93e') +
+    sh('M31 22 C35 27 38 32 38 38 L38 72 C38 78 34 80 28 80 L22 80 C30 74 32 50 31 22 Z') +
+    dP('M11 44 C20 40 29 40 37 44', '#fff3dc', 4) +
+    dP('M24 60 C29 60 32 63 32 67 C32 71 28 74 24 74 C20 74 16 71 16 67 C16 63 19 60 24 60 Z', '#e0602c', 2.6) +
+    dP('M24 60 C23 56 22 54 20 52', 'none', 2.2),
+  cereal:
+    oP('M10 14 C10 10 13 8 18 8 L42 8 C47 8 49 11 48 15 L47 66 C47 71 43 72 38 72 L19 72 C14 72 11 71 11 66 Z', '#efb93c') +
+    sh('M42 9 C47 9 49 11 48 15 L47 66 C47 71 43 72 38 72 L30 72 C39 64 42 34 42 9 Z') +
+    dP('M13 22 C24 18 35 18 45 22', '#d8383f', 4) +
+    dP('M17 44 C21 36 36 36 41 44 C36 52 21 52 17 44 Z', '#fff3dc', 2.6) +
+    dP('M23 42 h.1 M30 40 h.1 M35 43 h.1', '#8b5a2b', 3),
+  eggs:
+    oP('M6 24 C6 20 9 18 14 18 L54 18 C59 18 61 21 60 25 L59 36 C59 40 56 41 52 41 L13 41 C9 41 6 40 6 36 Z', '#c9a06a') +
+    sh('M52 19 C58 19 61 21 60 25 L59 36 C59 40 56 41 52 41 L40 41 C50 36 53 28 52 19 Z') +
+    dP('M13 22 C13 14 19 8 25 8 C31 8 36 14 36 22', '#fffbf0', 3) +
+    dP('M32 22 C32 15 37 10 43 10 C49 10 53 15 53 22', '#fffbf0', 3),
+  soda:
+    oP('M9 16 C9 11 15 8 21 8 C27 8 33 11 33 16 L33 54 C33 60 28 62 21 62 C14 62 9 60 9 54 Z', '#d8383f') +
+    sh('M27 10 C31 12 33 14 33 16 L33 54 C33 60 28 62 21 62 C27 56 28 34 27 10 Z') +
+    dP('M10 22 C17 19 26 19 32 22', '#fff', 3.4) +
+    dP('M15 34 C19 32 24 32 28 34 C26 42 25 46 24 50 L19 50 C18 46 17 42 15 34 Z', '#fff', 2.4),
+  jam:
+    oP('M12 22 C12 17 16 14 22 14 L30 14 C36 14 40 17 40 22 L40 56 C40 62 36 63 30 63 L21 63 C15 63 12 62 12 56 Z', '#d24a6a') +
+    sh('M32 15 C37 16 40 18 40 22 L40 56 C40 62 36 63 30 63 L24 63 C32 56 34 32 32 15 Z') +
+    oP('M11 8 C11 5 14 4 20 4 L32 4 C38 4 41 5 41 8 C41 11 38 13 32 13 L20 13 C14 13 11 11 11 8 Z', '#7ec6a5') +
+    dP('M15 30 C22 26 31 26 37 30', '#ffe0e8', 3) +
+    dP('M20 44 C22 40 26 40 28 44 C30 48 26 51 24 48 C22 51 18 48 20 44 Z', '#8e2740', 2.2),
+  noodle:
+    oP('M7 16 C7 12 11 10 18 10 L44 10 C51 10 54 13 53 18 L52 42 C52 48 47 49 41 49 L17 49 C10 49 7 47 7 42 Z', '#e8542e') +
+    sh('M44 11 C51 11 54 13 53 18 L52 42 C52 48 47 49 41 49 L30 49 C42 42 46 24 44 11 Z') +
+    dP('M11 18 C22 14 38 14 49 18', '#ffe9c9', 3.4) +
+    dP('M16 34 C22 28 30 32 34 28 C38 24 44 28 47 33', 'none', 2.6) +
+    dP('M16 40 C22 34 30 38 34 34 C38 30 44 34 47 39', 'none', 2.6),
+  choco:
+    oP('M11 12 C11 8 14 6 19 6 L41 6 C46 6 48 9 47 13 L46 62 C46 67 42 68 37 68 L20 68 C15 68 12 67 12 62 Z', '#8b5a2b') +
+    sh('M41 7 C46 7 48 9 47 13 L46 62 C46 67 42 68 37 68 L30 68 C38 60 42 32 41 7 Z') +
+    dP('M14 18 C24 15 34 15 44 18', '#f6e3c0', 3.4) +
+    `<g fill="#5b3413" stroke-width="2">
+      <path d="M16 30 C16 28 18 27 21 27 C24 27 26 28 26 30 L26 38 C26 40 24 41 21 41 C18 41 16 40 16 38 Z"/>
+      <path d="M31 29 C31 27 33 26 36 26 C39 26 41 27 41 29 L41 37 C41 39 39 40 36 40 C33 40 31 39 31 37 Z"/>
+      <path d="M16 46 C16 44 18 43 21 43 C24 43 26 44 26 46 L26 54 C26 56 24 57 21 57 C18 57 16 56 16 54 Z"/>
+      <path d="M31 45 C31 43 33 42 36 42 C39 42 41 43 41 45 L41 53 C41 55 39 56 36 56 C33 56 31 55 31 53 Z"/></g>`,
+
+  /* ---- fixtures, same grammar ---- */
+  fridge:
+    oP('M10 12 C10 7 14 5 20 5 L76 5 C83 5 86 8 86 14 L86 126 C86 133 82 136 75 136 L20 136 C13 136 10 133 10 126 Z', '#e8eefb') +
+    sh('M74 6 C82 6 86 9 86 14 L86 126 C86 133 82 136 75 136 L58 136 C70 126 74 70 74 6 Z') +
+    dP('M11 56 C30 52 66 52 85 56', 'none', 3.4) +
+    dP('M66 24 C70 24 72 26 72 30 L72 44 C72 48 70 50 66 50', 'none', 3.4) +
+    dP('M66 70 C70 70 72 72 72 76 L72 96 C72 100 70 102 66 102', 'none', 3.4),
+  till:
+    oP('M12 48 C12 42 17 40 25 40 L102 40 C110 40 114 43 113 50 L111 96 C111 103 106 105 98 105 L23 105 C15 105 12 102 12 96 Z', '#7ec6a5') +
+    sh('M100 41 C109 41 114 44 113 50 L111 96 C111 103 106 105 98 105 L80 105 C96 92 100 62 100 41 Z') +
+    oP('M30 8 C30 5 33 4 38 4 L82 4 C88 4 90 6 90 10 L90 34 C90 39 87 40 82 40 L37 40 C32 40 30 38 30 34 Z', '#eef3ff') +
+    dP('M40 16 C52 13 68 13 80 16', 'none', 2.8) +
+    dP('M40 26 C48 24 56 24 62 26', 'none', 2.4) +
+    `<g fill="${INK}" stroke="none">
+      <circle cx="34" cy="62" r="4"/><circle cx="52" cy="61" r="4"/><circle cx="70" cy="62" r="4"/>
+      <circle cx="34" cy="80" r="4"/><circle cx="52" cy="79" r="4"/><circle cx="70" cy="80" r="4"/></g>` +
+    dP('M86 58 C94 56 104 57 106 62 L104 86 C102 91 92 92 86 90 Z', '#f0c33c', 3),
+  cart:
+    dP('M6 12 C14 11 20 13 24 18 C30 26 34 34 38 44', 'none', 4.5) +
+    oP('M36 42 C58 38 116 38 138 42 C132 60 126 76 120 88 C96 92 66 92 54 88 C48 74 42 58 36 42 Z', '#ff9f43') +
+    sh('M120 40 C130 40 136 41 138 42 C132 60 126 76 120 88 C110 90 98 91 88 91 C104 80 116 60 120 40 Z') +
+    dP('M60 44 C58 58 60 74 64 86', 'none', 2.6) +
+    dP('M84 42 C83 58 84 74 86 88', 'none', 2.6) +
+    dP('M108 42 C108 58 106 74 104 88', 'none', 2.6) +
+    dP('M42 56 C66 52 112 52 132 56', 'none', 2.6) +
+    oP('M64 100 C64 95 68 92 73 92 C78 92 82 95 82 100 C82 105 78 108 73 108 C68 108 64 105 64 100 Z', '#3b3550') +
+    oP('M104 100 C104 95 108 92 113 92 C118 92 122 95 122 100 C122 105 118 108 113 108 C108 108 104 105 104 100 Z', '#3b3550'),
+
+  /* ---- arena sky ---- */
+  cloud: oP('M22 54 C12 52 8 42 12 32 C15 24 22 21 27 22 C30 10 42 4 52 8 C60 11 64 18 65 24 C76 23 84 30 84 40 C84 49 77 54 70 54 Z', '#fff'),
+  coin2: oP('M30 6 C43 6 54 16 54 30 C54 44 43 54 30 54 C17 54 6 44 6 30 C6 16 17 6 30 6 Z', '#f5cd55') +
+    dP('M30 14 C39 14 46 21 46 30 C46 39 39 46 30 46 C21 46 14 39 14 30 C14 21 21 14 30 14 Z', 'none', 2.4) +
+    dP('M30 17 L30 43 M24 23 C29 22 36 22 36 27 C36 31 30 31 25 31 C31 31 38 31 38 36 C38 41 30 41 24 40', 'none', 2.6),
+  gem: oP('M8 24 C10 20 18 8 22 6 C28 4 46 4 50 6 C54 8 62 20 64 24 C60 34 42 56 36 58 C30 56 12 34 8 24 Z', '#7fd8f2') +
+    dP('M8 24 C24 20 48 20 64 24 M22 6 C26 14 32 20 36 24 M50 6 C46 14 40 20 36 24 M36 24 L36 58', 'none', 2.4),
+  rocket: oP('M26 6 C36 12 44 26 44 40 C44 46 40 52 36 56 L16 56 C12 52 8 46 8 40 C8 26 16 12 26 6 Z', '#eef3ff') +
+    dP('M26 22 C31 22 35 26 35 31 C35 36 31 40 26 40 C21 40 17 36 17 31 C17 26 21 22 26 22 Z', '#7fd8f2', 2.6) +
+    oP('M16 44 C10 48 5 54 4 60 C9 59 14 57 17 54 Z', '#e05c5c') +
+    oP('M36 44 C42 48 47 54 48 60 C43 59 38 57 35 54 Z', '#e05c5c') +
+    oP('M20 56 C22 64 24 68 26 71 C28 68 30 64 32 56 Z', '#f0a73c'),
+  chart: dP('M8 54 C28 55 52 55 66 54', 'none', 3.4) +
+    oP('M14 34 C14 32 16 31 19 31 C22 31 24 32 24 34 L24 52 L14 52 Z', '#16c784') +
+    oP('M30 22 C30 20 32 19 35 19 C38 19 40 20 40 22 L40 52 L30 52 Z', '#16c784') +
+    oP('M46 12 C46 10 48 9 51 9 C54 9 56 10 56 12 L56 52 L46 52 Z', '#ea3943'),
 }
-const artEl = (name, opts) => svgArt(ART[name + '_vb'] || VB[name], ART[name], opts)
-const VB = { cloud:'0 0 92 62', coin2:'0 0 60 60', gem:'0 0 72 62', rocket:'0 0 52 72',
-  chart:'0 0 72 62', cart:'0 0 148 118', fridge:'0 0 92 140', till:'0 0 118 108',
-  bottle:'0 0 44 84', can:'0 0 44 62', cereal:'0 0 50 70', jar:'0 0 50 68',
-  milk:'0 0 52 72', banana:'0 0 66 62' }
+const artEl = (name, opts) => svgArt(VB[name], ART[name], opts)
 
 /* ================= BACKGROUND PROPS =================
    Scenery the player can turn on the boss. Deliberately dealing zero damage: this is
@@ -1571,6 +1671,8 @@ function spawnProp() {
   const kind = pick(theme.props)
   if (kind === 'eggbox' || kind === 'picklejar') return spawnShelfProp(kind)
   if (kind === 'screen') return spawnScreen()
+  if (kind === 'fridge') return spawnFridge()
+  if (kind === 'cart') return spawnCart()
   if (kind !== 'raincloud') return
   const p = el('div', 'prop raincloud')
   const w = 96, dist = AR.w + w + 40
@@ -1584,6 +1686,69 @@ function spawnProp() {
   $('#props').appendChild(p)
 }
 
+/* Open the fridge and a blast of cold hits whatever is in front of it. No damage —
+   he just goes pale and stiff for a few seconds, which is funnier than a number. */
+function spawnFridge() {
+  const p = el('div', 'prop p-fridge', artEl('fridge', { h: 118 }))
+  const x = rnd(8, 60)
+  p.style.left = x.toFixed(0) + 'px'
+  p.style.top = (AR.ground - 118).toFixed(0) + 'px'
+  p.style.animation = 'none'
+  let left = 2
+  p.addEventListener('pointerdown', e => {
+    e.stopPropagation()
+    if (left <= 0) return
+    left--
+    p.classList.remove('open'); void p.offsetWidth; p.classList.add('open')
+    Sound.play('shield', 1.4)
+    for (let i = 0; i < 14; i++) {
+      const f = el('i', 'frost')
+      f.style.left = (x + 30 + rnd(-24, 90)).toFixed(0) + 'px'
+      f.style.top = (AR.ground - rnd(60, 130)).toFixed(0) + 'px'
+      f.style.setProperty('--ff', rnd(60, 130).toFixed(0) + 'px')
+      f.style.animationDelay = (i * 40) + 'ms'
+      $('#props').appendChild(f)
+      setTimeout(() => f.remove(), 1200 + i * 40)
+    }
+    if (Math.abs(bossCX() - (x + 40)) < 250) {
+      bossEl.classList.add('frozen')
+      setTimeout(() => bossEl && bossEl.classList.remove('frozen'), 3200)
+    }
+    if (left <= 0) { p.classList.add('spent'); setTimeout(() => p.remove(), 2600) }
+  })
+  $('#props').appendChild(p)
+  setTimeout(() => { if (p.isConnected && left > 0) p.remove() }, 26000)
+}
+/* Shove the cart and it rolls into him. Pure knockback, no damage. */
+function spawnCart() {
+  const p = el('div', 'prop p-cart', artEl('cart', { h: 86 }))
+  const fromLeft = false                       // the fridge owns the left wall
+  const x = AR.w - rnd(132, 170)          // the gap between him and the checkout
+  p.style.left = x.toFixed(0) + 'px'
+  p.style.top = (AR.ground - 78).toFixed(0) + 'px'
+  p.style.animation = 'none'
+  if (!fromLeft) p.style.transform = 'scaleX(-1)'
+  let used = false
+  p.addEventListener('pointerdown', e => {
+    e.stopPropagation()
+    if (used) return
+    used = true
+    const dir = Math.sign(bossCX() - (x + 60)) || 1
+    p.style.setProperty('--cx', (dir * (Math.abs(bossCX() - x) + 120)).toFixed(0) + 'px')
+    p.classList.add('roll')
+    Sound.play('thud', 1.2)
+    setTimeout(() => {
+      if (!G.over && bossEl) {
+        G.vx += dir * 620; G.vy -= 280
+        whip(-dir, 700); shake('m'); Sound.play('crack', .85)
+        Sound.play('scream', clamp(G.boss.voice / 200, .55, 1.9))
+      }
+      p.classList.add('spent'); setTimeout(() => p.remove(), 700)
+    }, 460)
+  })
+  $('#props').appendChild(p)
+  setTimeout(() => { if (p.isConnected && !used) p.remove() }, 24000)
+}
 function spawnScreen() {
   const p = el('div', 'prop screen', '<i style="height:30%"></i><i style="height:62%"></i><i style="height:44%"></i><i style="height:78%"></i>')
   const x = rnd(30, AR.w - 120)
@@ -1621,7 +1786,10 @@ function dropCandle() {
 }
 function spawnShelfProp(kind) {
   const p = el('div', 'prop ' + kind, '<b></b><b></b><b></b>')
-  const x = rnd(40, AR.w - 110), y = AR.h * (kind === 'eggbox' ? .30 : .52)
+  // shelf surfaces sit at 32% and 54%; park the stock on one of them, not mid-air
+  const h = kind === 'eggbox' ? 40 : 74
+  const x = rnd(40, AR.w - 110)
+  const y = AR.h * (kind === 'eggbox' ? .27 : .46) - h
   p.style.left = x.toFixed(0) + 'px'
   p.style.top = y.toFixed(0) + 'px'
   p.style.animation = 'none'                       // shelf stock does not drift
@@ -1839,18 +2007,20 @@ function buildFloor(root, th) {
     <div class="desk"></div><div class="rug2"></div>`
 }
 function buildGrocery(root, th) {
-  const stock = ['bottle', 'can', 'cereal', 'jar', 'milk', 'can', 'bottle', 'cereal']
+  // eight sparse items read as a corner shop; packing the shelf reads as a supermarket
+  const stock = ['chips','milk','bread','fishcan','grapepack','juice',
+                 'cereal','eggs','soda','jam','noodle','choco']
   const shelf = (top, seed) => `<div class="shelf" style="top:${top}%">` +
-    stock.map((k, i) => `<i>${artEl(stock[(i + seed) % stock.length], { h: 46 })}</i>`).join('') +
-    '</div>'
+    Array.from({ length: 12 }, (_, i) => {
+      const k = stock[(i * 5 + seed) % stock.length]
+      return `<i>${artEl(k, { h: 34 + ((i * 7 + seed) % 14), tilt: ((i * 31 + seed) % 7) - 3 })}</i>`
+    }).join('') + '</div>'
   root.innerHTML = `
     <div class="ceil"><i></i><i></i><i></i><i></i></div>
-    ${shelf(15, 0)}${shelf(37, 3)}
+    ${shelf(14, 0)}${shelf(33, 5)}
     <div class="sign">${th.banner}</div>
     <div class="fixtures">
-      <span class="fx-fridge">${artEl('fridge', { h: 134 })}</span>
-      <span class="fx-till">${artEl('till', { h: 98 })}</span>
-      <span class="fx-cart">${artEl('cart', { h: 94 })}</span>
+      <span class="fx-till">${artEl('till', { h: 100 })}</span>
     </div>
     <div class="floor2"></div>`
 }
