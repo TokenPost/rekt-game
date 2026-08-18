@@ -162,9 +162,21 @@ html[lang="ko"] #rekt .row button{font-size:16px}
 .picklejar b{position:absolute;left:9px;top:20px;width:14px;height:42px;border-radius:8px;
   background:#4f8a3c;box-shadow:20px -6px 0 -1px #5f9a4d}
 /* fixtures you can actually use */
-.p-fridge,.p-cart{filter:drop-shadow(0 4px 0 #00000018)}
-.p-fridge.open{animation:fridgepop .5s}
-@keyframes fridgepop{40%{transform:scale(1.05,.95)}}
+.p-cart{filter:drop-shadow(0 4px 0 #00000018)}
+/* the door is its own panel on a left hinge, so opening it is a real swing */
+.p-fridge{position:relative;perspective:760px;filter:drop-shadow(0 4px 0 #00000018)}
+.p-fridge .fr-door{position:absolute;left:0;top:0;transform-origin:3px 50%;
+  transition:transform .55s cubic-bezier(.3,1.25,.45,1)}
+.p-fridge.open .fr-door{transform:rotateY(-118deg)}
+.p-fridge.cooling{filter:grayscale(.4) brightness(.9)}
+.p-fridge .glowbox{position:absolute;inset:8% 12% 6% 14%;border-radius:10px;opacity:0;
+  background:radial-gradient(circle at 50% 40%,#dff1ff,#9fd8ff00 72%);transition:opacity .3s}
+.p-fridge.open .glowbox{opacity:.9}
+/* cold rolling out of the open door */
+.chill{position:absolute;height:6px;border-radius:4px;pointer-events:none;z-index:6;
+  background:linear-gradient(90deg,#dff1ff,#9fd8ff00);animation:chillout .9s ease-out forwards}
+@keyframes chillout{0%{transform:translateX(0) scaleX(.25);opacity:0}
+  18%{opacity:.95}100%{transform:translateX(var(--cw)) scaleX(1.7);opacity:0}}
 .p-cart.roll{animation:cartroll .55s cubic-bezier(.4,0,.7,1) forwards}
 @keyframes cartroll{to{transform:translateX(var(--cx)) rotate(8deg)}}
 .p-cart.spent,.p-fridge.spent{opacity:.35}
@@ -1139,7 +1151,7 @@ const KO = {
 const THEMES = {
   arena:   { id:'arena', ground:.85, kind:'arena', props:['raincloud'],
              name:{ en:'TO THE MOON ARENA', ko:'투 더 문 아레나' }, sun:'₿', banner:'TO THE MOON ARENA' },
-  grocery: { id:'grocery', ground:.82, kind:'grocery', props:['eggbox','picklejar','fridge','cart'],
+  grocery: { id:'grocery', ground:.82, kind:'grocery', props:['eggbox','picklejar','cart'], fixtures:['fridge'],
              name:{ en:'GROCERY', ko:'마트' }, banner:'AISLE 7 — EGGS & PICKLES' },
   floor:   { id:'floor', ground:.84, kind:'floor', props:['screen'],
              name:{ en:'TRADING FLOOR', ko:'트레이딩 플로어' }, banner:'MARGIN CALL' },
@@ -1576,7 +1588,7 @@ const VB = {
   chips:'0 0 58 82', milk:'0 0 54 78', bread:'0 0 70 56', fishcan:'0 0 64 44',
   grapepack:'0 0 56 72', juice:'0 0 48 86', cereal:'0 0 56 76', eggs:'0 0 66 44',
   soda:'0 0 42 66', jam:'0 0 50 66', noodle:'0 0 60 54', choco:'0 0 54 72',
-  fridge:'0 0 96 142', till:'0 0 124 112', cart:'0 0 150 120',
+  fridge:'0 0 96 142', fridgeBox:'0 0 96 142', fridgeDoor:'0 0 92 142', till:'0 0 124 112', cart:'0 0 150 120',
   cloud:'0 0 92 62', coin2:'0 0 60 60', gem:'0 0 72 62', rocket:'0 0 52 72', chart:'0 0 72 62',
 }
 const ART = {
@@ -1664,6 +1676,24 @@ const ART = {
     dP('M11 56 C30 52 66 52 85 56', 'none', 3.4) +
     dP('M66 24 C70 24 72 26 72 30 L72 44 C72 48 70 50 66 50', 'none', 3.4) +
     dP('M66 70 C70 70 72 72 72 76 L72 96 C72 100 70 102 66 102', 'none', 3.4),
+  /* carcass: what you see once the door swings away */
+  fridgeBox:
+    oP('M10 12 C10 7 14 5 20 5 L76 5 C83 5 86 8 86 14 L86 126 C86 133 82 136 75 136 L20 136 C13 136 10 133 10 126 Z', '#9fb4d8') +
+    dP('M18 16 C18 13 21 12 26 12 L70 12 C76 12 78 14 78 18 L78 122 C78 127 75 128 70 128 L26 128 C21 128 18 127 18 122 Z', '#5d7099', 3) +
+    dP('M19 52 C36 49 62 49 77 52', 'none', 3.4) +
+    dP('M19 92 C36 89 62 89 77 92', 'none', 3.4) +
+    `<g stroke-width="2.6">
+      <path d="M26 34 C26 31 28 30 31 30 C34 30 36 31 36 34 L36 48 C36 50 34 51 31 51 C28 51 26 50 26 48 Z" fill="#f2a93e"/>
+      <path d="M44 32 C44 29 47 28 51 28 C55 28 57 30 57 33 L56 48 C56 50 54 51 50 51 C46 51 44 50 44 48 Z" fill="#7fc46a"/>
+      <path d="M28 72 C28 69 31 68 35 68 C39 68 41 70 41 73 L41 88 C41 90 39 91 35 91 C31 91 28 90 28 88 Z" fill="#d8383f"/>
+      <path d="M50 70 C56 70 60 74 60 80 C60 86 56 90 50 90 C44 90 40 86 40 80 C40 74 44 70 50 70 Z" fill="#8f5cc6"/>
+      <path d="M28 104 C28 101 31 100 36 100 L62 100 C68 100 70 102 70 106 L70 118 C70 122 67 123 62 123 L36 123 C31 123 28 122 28 118 Z" fill="#efb93c"/></g>`,
+  fridgeDoor:
+    oP('M6 12 C6 7 10 5 16 5 L74 5 C81 5 84 8 84 14 L84 126 C84 133 80 136 73 136 L16 136 C9 136 6 133 6 126 Z', '#eef3ff') +
+    sh('M72 6 C80 6 84 9 84 14 L84 126 C84 133 80 136 73 136 L60 136 C70 124 73 70 72 6 Z') +
+    dP('M8 56 C26 52 62 52 82 56', 'none', 3) +
+    oP('M64 26 C69 26 71 29 71 33 L71 50 C71 54 69 57 64 57 C60 57 58 54 58 50 L58 33 C58 29 60 26 64 26 Z', '#b9c6e0') +
+    oP('M64 74 C69 74 71 77 71 81 L71 104 C71 108 69 111 64 111 C60 111 58 108 58 104 L58 81 C58 77 60 74 64 74 Z', '#b9c6e0'),
   till:
     oP('M12 48 C12 42 17 40 25 40 L102 40 C110 40 114 43 113 50 L111 96 C111 103 106 105 98 105 L23 105 C15 105 12 102 12 96 Z', '#7ec6a5') +
     sh('M100 41 C109 41 114 44 113 50 L111 96 C111 103 106 105 98 105 L80 105 C96 92 100 62 100 41 Z') +
@@ -1743,6 +1773,9 @@ function clearProps() {
   clearTimeout(propTimer); propTimer = 0
   const p = $('#props'); if (p) p.innerHTML = ''
 }
+function placeFixtures() {
+  (theme.fixtures || []).forEach(k => { if (k === 'fridge') placeFridge() })
+}
 function scheduleProp() {
   clearTimeout(propTimer)
   propTimer = setTimeout(() => { spawnProp(); scheduleProp() }, rnd(19000, 30000))
@@ -1798,7 +1831,6 @@ function spawnProp() {
   const kind = pick(theme.props)
   if (kind === 'eggbox' || kind === 'picklejar') return spawnShelfProp(kind)
   if (kind === 'screen') return spawnScreen()
-  if (kind === 'fridge') return spawnFridge()
   if (kind === 'cart') return spawnCart()
   if (kind !== 'raincloud') return
   const p = makeProp('raincloud')
@@ -1815,28 +1847,45 @@ function spawnProp() {
 
 /* Open the fridge and a blast of cold hits whatever is in front of it. No damage —
    he just goes pale and stiff for a few seconds, which is funnier than a number. */
-function spawnFridge() {
-  const p = makeProp('p-fridge', artEl('fridge', { h: 118 }))
-  const x = rnd(8, 60)
-  p.style.left = x.toFixed(0) + 'px'
-  p.style.top = (AR.ground - 118).toFixed(0) + 'px'
+function placeFridge() {
+  const H = 122
+  const p = makeProp('p-fridge',
+    artEl('fridgeBox', { h: H }) + '<div class="glowbox"></div>' +
+    `<span class="fr-door">${artEl('fridgeDoor', { h: H })}</span>`)
+  const x = 18
+  p.style.left = x + 'px'
+  p.style.top = (AR.ground - H) + 'px'
   p.style.animation = 'none'
-  let left = 2
+  let ready = true
   p.addEventListener('pointerdown', e => {
     e.stopPropagation()
-    if (left <= 0) return
-    left--
-    p.classList.remove('open'); void p.offsetWidth; p.classList.add('open')
+    if (!ready) return
+    ready = false
+    p.classList.add('open')
     Sound.play('shield', 1.4)
-    for (let i = 0; i < 14; i++) {
-      const f = el('i', 'frost')
-      f.style.left = (x + 30 + rnd(-24, 90)).toFixed(0) + 'px'
-      f.style.top = (AR.ground - rnd(60, 130)).toFixed(0) + 'px'
-      f.style.setProperty('--ff', rnd(60, 130).toFixed(0) + 'px')
-      f.style.animationDelay = (i * 40) + 'ms'
-      $('#props').appendChild(f)
-      setTimeout(() => f.remove(), 1200 + i * 40)
+    // cold rolls out of the doorway, then frost settles
+    for (let i = 0; i < 10; i++) {
+      const c = el('i', 'chill')
+      c.style.left = (x + 70) + 'px'
+      c.style.top = (AR.ground - 20 - rnd(10, 100)).toFixed(0) + 'px'
+      c.style.width = rnd(30, 70).toFixed(0) + 'px'
+      c.style.setProperty('--cw', rnd(120, 260).toFixed(0) + 'px')
+      c.style.animationDelay = (i * 55) + 'ms'
+      $('#props').appendChild(c)
+      setTimeout(() => c.remove(), 1300 + i * 55)
     }
+    for (let i = 0; i < 16; i++) {
+      const f = el('i', 'frost')
+      f.style.left = (x + 60 + rnd(-10, 150)).toFixed(0) + 'px'
+      f.style.top = (AR.ground - rnd(50, 130)).toFixed(0) + 'px'
+      f.style.setProperty('--ff', rnd(60, 130).toFixed(0) + 'px')
+      f.style.animationDelay = (i * 45) + 'ms'
+      $('#props').appendChild(f)
+      setTimeout(() => f.remove(), 1300 + i * 45)
+    }
+    setTimeout(() => p.classList.remove('open'), 1500)
+    p.classList.add('cooling')
+    setTimeout(() => { p.classList.remove('cooling'); ready = true }, 7000)
     if (Math.abs(bossCX() - (x + 40)) < 250) {
       bossEl.classList.add('frozen')
       propHit('FROZEN!', '#9fdcffdd', { text: '#bfe6ff', shake: 'l', stop: .1, pitch: 150, say: 'S-so cold...' })
@@ -1848,10 +1897,8 @@ function spawnFridge() {
         if (!G.over) restorePose()
       }, 3200)
     }
-    if (left <= 0) { p.classList.add('spent'); setTimeout(() => p.remove(), 2600) }
   })
   $('#props').appendChild(p)
-  setTimeout(() => { if (p.isConnected && left > 0) p.remove() }, 26000)
 }
 /* Shove the cart and it rolls into him. Pure knockback, no damage. */
 function spawnCart() {
@@ -2314,7 +2361,8 @@ function start(id) {
   bossEl.addEventListener('pointercancel', letGo)
   puppet.appendChild(bossEl); st.appendChild(puppet)
   skel = makeSkeleton(bossEl)
-  measure(); paintHp(); render(); buildAim(); $('#aim').classList.remove('on')
+  measure(); placeFixtures()          // needs AR.ground, so only after measure()
+  paintHp(); render(); buildAim(); $('#aim').classList.remove('on')
   last = performance.now(); acc = 0
   requestAnimationFrame(loop)
 }
