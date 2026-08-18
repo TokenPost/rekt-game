@@ -1374,10 +1374,18 @@ Save.load()
    Deliberately NOT the default — shipping every visitor a full wallet would
    destroy the one thing the economy is being tested for, whether the prices
    feel right. Reload without #dev and the real save is still there. */
-if (location.hash.toLowerCase().includes('dev')) {
+const devHash = location.hash.toLowerCase()
+if (devHash.includes('devall')) {          // #devall — everything open, for touring content
   Save.coins = 999999
   Save.owned = WEAPONS.map(w => w.id)
   Save.stages = Object.keys(THEMES)
+  Save.stage = 'arena'
+  Save.save()
+} else if (devHash.includes('dev')) {      // #dev — full wallet, nothing bought yet, so the
+  Save.coins = 999999                      // shop and its unlock celebration can be exercised
+  Save.owned = FREE_WEAPONS.slice()
+  Save.stages = ['arena']
+  Save.stage = 'arena'
   Save.save()
 }
 
