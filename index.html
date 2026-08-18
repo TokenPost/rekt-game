@@ -177,8 +177,9 @@ html[lang="ko"] #rekt .row button{font-size:16px}
   background:linear-gradient(90deg,#dff1ff,#9fd8ff00);animation:chillout .9s ease-out forwards}
 @keyframes chillout{0%{transform:translateX(0) scaleX(.25);opacity:0}
   18%{opacity:.95}100%{transform:translateX(var(--cw)) scaleX(1.7);opacity:0}}
-.p-cart.roll{animation:cartroll .55s cubic-bezier(.4,0,.7,1) forwards}
-@keyframes cartroll{to{transform:translateX(var(--cx)) rotate(8deg)}}
+.p-cart.roll{animation:cartroll 1.35s cubic-bezier(.35,0,.75,1) forwards}
+@keyframes cartroll{35%{transform:translateX(calc(var(--cx) * .34)) rotate(4deg)}
+  to{transform:translateX(var(--cx)) rotate(14deg)}}
 .p-cart.spent,.p-fridge.spent{opacity:.35}
 .frost{position:absolute;pointer-events:none;z-index:6;width:16px;height:16px;
   background:#bfe6ff;clip-path:polygon(50% 0,61% 35%,100% 35%,68% 57%,79% 100%,50% 72%,21% 100%,32% 57%,0 35%,39% 35%);
@@ -232,6 +233,41 @@ html[lang="ko"] #rekt .row button{font-size:16px}
   border-radius:5px;animation:candledrop .5s cubic-bezier(.5,0,.85,1) forwards}
 @keyframes candledrop{0%{transform:translateY(-60px) scaleY(.5);opacity:0}
   25%{opacity:1}100%{transform:translateY(var(--cd));opacity:1}}
+
+
+/* ================= STAGE: KITCHEN ================= */
+.room.kitchen{background:linear-gradient(#fdf6e8 0%,#f2e6d0 52%,#e2d2b6 100%)}
+.kitchen .tilewall{position:absolute;left:0;right:0;top:0;height:56%;
+  background:repeating-conic-gradient(#fbf3e4 0% 25%,#eee2cc 0% 50%) 0 0/44px 44px;
+  border-bottom:5px solid #241a4d}
+.kitchen .rail{position:absolute;left:6%;right:6%;top:9%;height:5px;border-radius:3px;background:#241a4d}
+.kitchen .hang{position:absolute;top:9%;display:flex;gap:26px}
+.kitchen .counter{position:absolute;left:0;right:0;bottom:26%;height:9%;
+  background:linear-gradient(#e8dcc4,#c9b892);border-block:5px solid #241a4d}
+.kitchen .cab{position:absolute;left:0;right:0;bottom:0;height:26%;
+  background:repeating-linear-gradient(90deg,#b98a52 0 76px,#a97a45 76px 152px);border-top:5px solid #241a4d}
+.kitchen .sign{position:absolute;left:50%;top:15%;transform:translateX(-50%);padding:5px 16px;
+  border-radius:8px;background:#e05c5c;color:#fff;border:4px solid #241a4d;font-size:15px;
+  letter-spacing:2px;box-shadow:0 5px 0 #241a4d55;white-space:nowrap}
+.kitchen .fx-stove{position:absolute;right:4%;bottom:26%}
+.kitchen .fx-hood{position:absolute;right:3%;top:16%}
+/* props */
+.p-pot{cursor:pointer}
+.p-pot.boil{animation:potshake .18s infinite}
+@keyframes potshake{50%{transform:translateX(2px) rotate(1deg)}}
+.steam{position:absolute;pointer-events:none;z-index:6;width:22px;height:22px;border-radius:50%;
+  background:#ffffffcc;animation:steamup 1.1s ease-out forwards}
+@keyframes steamup{0%{transform:translateY(0) scale(.4);opacity:0}
+  25%{opacity:.9}100%{transform:translateY(var(--su)) scale(2.1);opacity:0}}
+.puff{position:absolute;pointer-events:none;z-index:7;border-radius:50%;background:#fffdf7;
+  animation:puffout .8s ease-out forwards}
+@keyframes puffout{0%{transform:scale(.2);opacity:0}20%{opacity:1}100%{transform:scale(2.6);opacity:0}}
+/* covered in flour */
+.floured .skull,.floured .shirt,.floured .hood,.floured .dogeskull,.floured .snout,
+.floured .afro,.floured .sleeve,.floured .arm,.floured .fore,.floured .leg,.floured .shin{
+  filter:brightness(1.7) saturate(.12)}
+.p-peel{cursor:pointer}
+.p-peel.slide{transition:transform .45s cubic-bezier(.4,0,.7,1)}
 
 /* ============ GAME SHELL ============ */
 #game{position:relative;height:100%;display:flex;flex-direction:column}
@@ -1151,8 +1187,10 @@ const KO = {
 const THEMES = {
   arena:   { id:'arena', ground:.85, kind:'arena', props:['raincloud'],
              name:{ en:'TO THE MOON ARENA', ko:'투 더 문 아레나' }, sun:'₿', banner:'TO THE MOON ARENA' },
-  grocery: { id:'grocery', ground:.82, kind:'grocery', props:['eggbox','picklejar','cart'], fixtures:['fridge'],
+  grocery: { id:'grocery', ground:.82, kind:'grocery', props:['eggbox','picklejar','cart','peel'], fixtures:['fridge'],
              name:{ en:'GROCERY', ko:'마트' }, banner:'AISLE 7 — EGGS & PICKLES' },
+  kitchen: { id:'kitchen', ground:.83, kind:'kitchen', props:['flour','pan'], fixtures:['pot'],
+             name:{ en:'KITCHEN', ko:'주방' }, banner:'COOKING THE BOOKS' },
   floor:   { id:'floor', ground:.84, kind:'floor', props:['screen'],
              name:{ en:'TRADING FLOOR', ko:'트레이딩 플로어' }, banner:'MARGIN CALL' },
 }
@@ -1347,6 +1385,8 @@ function stepJoint(j, dt) {
    and the reason there is no leaderboard. */
 const FREE_WEAPONS = ['candle', 'bat', 'hammer', 'pizza']
 const PRICES = { doge: 600, whale: 900 }
+// kitchen is built but withheld until its two bosses land; an empty roster is worse
+// than no stage at all
 const STAGE_PRICES = { grocery: 1200, floor: 2000 }
 const Save = {
   coins: 0, owned: FREE_WEAPONS.slice(), stages: ['arena'], stage: 'arena',
@@ -1440,7 +1480,7 @@ function stageName(id) { const th = THEMES[id]; return (th.name && th.name[lang]
 function buildStages() {
   const bar = $('#stagebar'); if (!bar) return
   bar.innerHTML = ''
-  Object.keys(THEMES).forEach(id => {
+  Object.keys(THEMES).filter(id => Save.hasStage(id) || STAGE_PRICES[id]).forEach(id => {
     const owned = Save.hasStage(id)
     const b = el('button', (Save.stage === id ? 'on ' : '') + (owned ? '' : 'locked'),
       stageName(id) + (owned ? '' : '  🔒 ' + STAGE_PRICES[id]))
@@ -1589,7 +1629,8 @@ const VB = {
   grapepack:'0 0 56 72', juice:'0 0 48 86', cereal:'0 0 56 76', eggs:'0 0 66 44',
   soda:'0 0 42 66', jam:'0 0 50 66', noodle:'0 0 60 54', choco:'0 0 54 72',
   fridge:'0 0 96 142', fridgeBox:'0 0 96 142', fridgeDoor:'0 0 92 142', till:'0 0 124 112', cart:'0 0 150 120',
-  cloud:'0 0 92 62', coin2:'0 0 60 60', gem:'0 0 72 62', rocket:'0 0 52 72', chart:'0 0 72 62',
+  peel:'0 0 70 62', stove:'0 0 112 112', pot:'0 0 60 66', pan:'0 0 98 54',
+  flour:'0 0 60 90', hood:'0 0 116 50', cloud:'0 0 92 62', coin2:'0 0 60 60', gem:'0 0 72 62', rocket:'0 0 52 72', chart:'0 0 72 62',
 }
 const ART = {
   chips:
@@ -1716,6 +1757,39 @@ const ART = {
     oP('M104 100 C104 95 108 92 113 92 C118 92 122 95 122 100 C122 105 118 108 113 108 C108 108 104 105 104 100 Z', '#3b3550'),
 
   /* ---- arena sky ---- */
+  /* ---- grocery extra + kitchen ---- */
+  peel:
+    oP('M8 14 C10 30 24 42 44 44 C36 50 20 48 12 40 C6 34 5 22 8 14 Z', '#f2d84e') +
+    dP('M8 14 C14 22 22 32 34 38', 'none', 2.4) +
+    oP('M44 44 C52 40 60 34 64 26 C66 34 60 44 50 48 Z', '#e8c93c') +
+    oP('M12 40 C6 46 4 52 6 58 C12 54 16 48 18 44 Z', '#e8c93c'),
+  stove:
+    oP('M8 34 C8 28 12 26 20 26 L92 26 C100 26 104 29 104 36 L104 96 C104 104 99 106 91 106 L20 106 C12 106 8 103 8 96 Z', '#b9c4d8') +
+    sh('M90 27 C100 27 104 30 104 36 L104 96 C104 104 99 106 91 106 L72 106 C86 92 90 56 90 27 Z') +
+    dP('M14 56 C40 52 74 52 98 56', 'none', 3.4) +
+    dP('M20 72 C20 68 24 66 30 66 L82 66 C88 66 92 68 92 73 L92 96 C92 101 88 102 82 102 L30 102 C24 102 20 101 20 96 Z', '#2b3350', 3) +
+    `<g stroke-width="2.6" fill="#f0a73c"><circle cx="30" cy="40" r="6"/><circle cx="52" cy="39" r="6"/>
+      <circle cx="74" cy="40" r="6"/><circle cx="94" cy="40" r="5"/></g>`,
+  pot:
+    oP('M10 26 C10 20 16 18 30 18 C44 18 50 20 50 26 L48 52 C48 60 42 62 30 62 C18 62 12 60 12 52 Z', '#8d99b4') +
+    sh('M42 20 C48 21 50 23 50 26 L48 52 C48 60 42 62 30 62 C38 56 42 38 42 20 Z') +
+    oP('M4 24 C4 20 8 18 14 20 C10 24 10 28 14 30 C8 32 4 28 4 24 Z', '#6f7c98') +
+    oP('M46 20 C52 18 56 20 56 24 C56 28 52 32 46 30 C50 28 50 24 46 20 Z', '#6f7c98') +
+    dP('M12 30 C22 26 38 26 48 30', 'none', 3),
+  pan:
+    oP('M6 30 C6 18 18 12 30 12 C42 12 54 18 54 30 C54 42 42 48 30 48 C18 48 6 42 6 30 Z', '#3b4356') +
+    dP('M14 29 C18 22 42 22 46 29 C42 36 18 36 14 29 Z', '#5b6478', 2.6) +
+    oP('M54 26 C66 24 82 24 92 26 C96 27 96 33 92 34 C82 36 66 36 54 34 Z', '#6d4a24'),
+  flour:
+    oP('M12 24 C12 18 18 14 30 14 C42 14 48 18 48 24 L50 74 C50 82 42 84 30 84 C18 84 10 82 10 74 Z', '#f2ecdc') +
+    sh('M42 16 C47 18 48 21 48 24 L50 74 C50 82 42 84 30 84 C38 76 42 44 42 16 Z') +
+    dP('M14 20 C22 12 38 12 46 20', 'none', 3) +
+    dP('M16 44 C24 40 36 40 44 44', '#d8cdb2', 3) +
+    dP('M24 56 C28 52 32 52 36 56 C34 62 26 62 24 56 Z', '#c0b294', 2.4),
+  hood:
+    oP('M4 10 C4 6 8 4 14 4 L102 4 C108 4 112 7 112 12 L112 26 L92 46 L24 46 L4 26 Z', '#c9d3e6') +
+    sh('M100 5 C108 5 112 8 112 12 L112 26 L92 46 L74 46 L94 26 L100 5 Z') +
+    dP('M20 44 C40 40 76 40 96 44', 'none', 3.4),
   cloud: oP('M22 54 C12 52 8 42 12 32 C15 24 22 21 27 22 C30 10 42 4 52 8 C60 11 64 18 65 24 C76 23 84 30 84 40 C84 49 77 54 70 54 Z', '#fff'),
   coin2: oP('M30 6 C43 6 54 16 54 30 C54 44 43 54 30 54 C17 54 6 44 6 30 C6 16 17 6 30 6 Z', '#f5cd55') +
     dP('M30 14 C39 14 46 21 46 30 C46 39 39 46 30 46 C21 46 14 39 14 30 C14 21 21 14 30 14 Z', 'none', 2.4) +
@@ -1746,8 +1820,14 @@ const artEl = (name, opts) => svgArt(VB[name], ART[name], opts)
    the effect actually registers. */
 function makeProp(cls, inner) {
   const p = el('div', 'prop ' + cls, inner || '')
+  const show = () => $('#aim').classList.remove('away')
   p.addEventListener('pointerenter', () => $('#aim').classList.add('away'))
-  p.addEventListener('pointerleave', () => $('#aim').classList.remove('away'))
+  p.addEventListener('pointerleave', show)
+  p.addEventListener('pointercancel', show)
+  // props delete themselves while the cursor is still on them, so pointerleave
+  // never arrives and the weapon would stay faded out forever
+  const gone = p.remove.bind(p)
+  p.remove = () => { show(); gone() }
   return p
 }
 function tintFlash(color) {
@@ -1758,6 +1838,7 @@ function tintFlash(color) {
 /* the dramatic beat: wash, shake, freeze-frame, shout, and he yells about it */
 function propHit(label, color, opts) {
   const o = opts || {}
+  $('#aim').classList.remove('away')
   tintFlash(color)
   banner(label, o.text || color)
   shake(o.shake || 'l')
@@ -1774,7 +1855,10 @@ function clearProps() {
   const p = $('#props'); if (p) p.innerHTML = ''
 }
 function placeFixtures() {
-  (theme.fixtures || []).forEach(k => { if (k === 'fridge') placeFridge() })
+  (theme.fixtures || []).forEach(k => {
+    if (k === 'fridge') placeFridge()
+    if (k === 'pot') placePot()
+  })
 }
 function scheduleProp() {
   clearTimeout(propTimer)
@@ -1831,6 +1915,9 @@ function spawnProp() {
   const kind = pick(theme.props)
   if (kind === 'eggbox' || kind === 'picklejar') return spawnShelfProp(kind)
   if (kind === 'screen') return spawnScreen()
+  if (kind === 'flour') return spawnFlour()
+  if (kind === 'pan') return spawnPan()
+  if (kind === 'peel') return spawnPeel()
   if (kind === 'cart') return spawnCart()
   if (kind !== 'raincloud') return
   const p = makeProp('raincloud')
@@ -1915,7 +2002,8 @@ function spawnCart() {
     if (used) return
     used = true
     const dir = Math.sign(bossCX() - (x + 60)) || 1
-    p.style.setProperty('--cx', (dir * (Math.abs(bossCX() - x) + 120)).toFixed(0) + 'px')
+    // carry it well past him and out of the aisle instead of deleting it mid-shot
+    p.style.setProperty('--cx', (dir * (Math.abs(bossCX() - x) + AR.w * .7)).toFixed(0) + 'px')
     p.classList.add('roll')
     Sound.play('thud', 1.2)
     setTimeout(() => {
@@ -1925,7 +2013,7 @@ function spawnCart() {
         bits(bossCX(), bossCY(), 14, '#ff9f43')
         propHit('RUN OVER!', '#ff9f43cc', { text: '#ffd06a', shake: 'l', stop: .11, say: 'AAGH!' })
       }
-      p.classList.add('spent'); setTimeout(() => p.remove(), 700)
+      setTimeout(() => p.remove(), 900)      // after it has rolled off, not on impact
     }, 460)
   })
   $('#props').appendChild(p)
@@ -2032,6 +2120,143 @@ function puddle(x) {
   m.appendChild(p)
   const all = m.querySelectorAll('.puddle')
   for (let i = 0; i < all.length - 8; i++) all[i].remove()
+}
+
+
+function buildKitchen(root, th) {
+  const pans = Array.from({ length: 4 }, (_, i) =>
+    `<span style="transform:rotate(${(i * 37) % 9 - 4}deg)">${artEl('pan', { h: 40 })}</span>`).join('')
+  root.innerHTML = `
+    <div class="tilewall"></div>
+    <div class="rail"></div>
+    <div class="hang" style="left:8%">${pans}</div>
+    <div class="sign">${th.banner}</div>
+    <span class="fx-hood">${artEl('hood', { h: 54 })}</span>
+    <span class="fx-stove">${artEl('stove', { h: 122 })}</span>
+    <div class="counter"></div>
+    <div class="cab"></div>`
+}
+/* a pot that will not stop boiling; tap it for a face full of steam */
+function placePot() {
+  const H = 64
+  const p = makeProp('p-pot', artEl('pot', { h: H }))
+  const x = AR.w - 128
+  p.style.left = x + 'px'
+  p.style.top = (AR.ground - 150) + 'px'
+  p.style.animation = 'none'
+  p.classList.add('boil')
+  let ready = true
+  p.addEventListener('pointerdown', e => {
+    e.stopPropagation()
+    if (!ready) return
+    ready = false
+    Sound.play('rain'); Sound.play('splat', 1.4)
+    for (let i = 0; i < 14; i++) {
+      const st = el('i', 'steam')
+      st.style.left = (x + 20 + rnd(-14, 40)) + 'px'
+      st.style.top = (AR.ground - 150 + rnd(-6, 10)) + 'px'
+      st.style.setProperty('--su', -rnd(70, 150) + 'px')
+      st.style.animationDelay = (i * 48) + 'ms'
+      $('#props').appendChild(st)
+      setTimeout(() => st.remove(), 1400 + i * 48)
+    }
+    if (Math.abs(bossCX() - x) < 230) {
+      propHit('SCALDED!', '#ffd9a8cc', { text: '#ffb36b', shake: 'l', stop: .09, say: 'HOT! HOT!' })
+      G.vy -= 320; whip(Math.random() < .5 ? 1 : -1, 800)
+      for (const j of skel) j.v += rnd(-160, 160)
+    }
+    setTimeout(() => { ready = true }, 6500)
+  })
+  $('#props').appendChild(p)
+}
+/* a sack of flour, and afterwards he is white from head to foot */
+function spawnFlour() {
+  const p = makeProp('p-flour', artEl('flour', { h: 74 }))
+  const x = rnd(50, AR.w - 150)
+  p.style.left = x.toFixed(0) + 'px'
+  p.style.top = (AR.ground - 74 - AR.h * .09).toFixed(0) + 'px'
+  p.style.animation = 'none'
+  let used = false
+  p.addEventListener('pointerdown', e => {
+    e.stopPropagation()
+    if (used) return
+    used = true
+    for (let i = 0; i < 16; i++) {
+      const f = el('i', 'puff')
+      const sz = rnd(26, 70)
+      f.style.width = f.style.height = sz.toFixed(0) + 'px'
+      f.style.left = (x + rnd(-40, 70)) + 'px'
+      f.style.top = (AR.ground - rnd(20, 140)) + 'px'
+      f.style.animationDelay = (i * 32) + 'ms'
+      $('#props').appendChild(f)
+      setTimeout(() => f.remove(), 1000 + i * 32)
+    }
+    if (Math.abs(bossCX() - x) < 250) {
+      bossEl.classList.add('floured')
+      propHit('FLOURED!', '#fffdf7dd', { text: '#fff', shake: 'm', stop: .07, say: 'I am covered.' })
+      setTimeout(() => bossEl && bossEl.classList.remove('floured'), 5200)
+    }
+    p.style.opacity = '.3'
+    setTimeout(() => p.remove(), 900)
+  })
+  $('#props').appendChild(p)
+  setTimeout(() => { if (p.isConnected && !used) p.remove() }, 22000)
+}
+/* a pan on the rail, waiting to fall on someone */
+function spawnPan() {
+  const p = makeProp('p-pan', artEl('pan', { h: 44 }))
+  const x = rnd(60, AR.w - 160)
+  p.style.left = x.toFixed(0) + 'px'
+  p.style.top = (AR.h * .12).toFixed(0) + 'px'
+  p.style.animation = 'none'
+  let used = false
+  p.addEventListener('pointerdown', e => {
+    e.stopPropagation()
+    if (used) return
+    used = true
+    const target = bossCY() - BODY_H * .34
+    p.style.transition = 'transform .38s cubic-bezier(.5,0,.9,1)'
+    p.style.transform = `translate(${(bossCX() - x - 40).toFixed(0)}px,${(target - AR.h * .12).toFixed(0)}px) rotate(220deg)`
+    setTimeout(() => {
+      if (!G.over && bossEl) {
+        propHit('CLANG!', '#c9d3e6cc', { text: '#e6ecfa', shake: 'l', stop: .12, say: 'OW! My head!' })
+        Sound.play('crack', .7)
+        whip(Math.random() < .5 ? 1 : -1, 900)
+        for (const j of skel) j.v += rnd(-120, 120)
+      }
+      p.style.opacity = '.3'; setTimeout(() => p.remove(), 600)
+    }, 380)
+  })
+  $('#props').appendChild(p)
+  setTimeout(() => { if (p.isConnected && !used) p.remove() }, 22000)
+}
+/* banana peel: he stands on it, his legs go out from under him */
+function spawnPeel() {
+  const p = makeProp('p-peel', artEl('peel', { h: 34 }))
+  const x = rnd(60, AR.w - 120)
+  p.style.left = x.toFixed(0) + 'px'
+  p.style.top = (AR.ground + 6).toFixed(0) + 'px'
+  p.style.animation = 'none'
+  let used = false
+  p.addEventListener('pointerdown', e => {
+    e.stopPropagation()
+    if (used) return
+    used = true
+    p.classList.add('slide')
+    p.style.transform = `translateX(${(bossCX() - x - 20).toFixed(0)}px)`
+    setTimeout(() => {
+      if (!G.over && bossEl) {
+        const dir = Math.random() < .5 ? 1 : -1
+        G.vx += dir * 520; G.vy -= 620
+        whip(dir, 1400)
+        for (const j of skel) j.v += rnd(-260, 260)
+        propHit('WHOOPS!', '#f2d84ecc', { text: '#ffe066', shake: 'l', stop: .12, say: 'Wh-whoa!' })
+      }
+      p.style.opacity = '.35'; setTimeout(() => p.remove(), 900)
+    }, 460)
+  })
+  $('#props').appendChild(p)
+  setTimeout(() => { if (p.isConnected && !used) p.remove() }, 20000)
 }
 
 /* ================= SIGNATURE REACTIONS =================
@@ -2166,6 +2391,7 @@ function buildRoom(root, th) {
   root.className = 'room ' + th.kind
   if (th.kind === 'grocery') return buildGrocery(root, th)
   if (th.kind === 'floor') return buildFloor(root, th)
+  if (th.kind === 'kitchen') return buildKitchen(root, th)
   root.innerHTML = `<div class="rays"></div><div class="sun">${th.sun}</div>
     <div class="skyline"></div><div class="floor"></div><div class="mat"></div>
     <div class="banner">${th.banner}</div>`
