@@ -285,6 +285,7 @@ header{position:relative;z-index:5;display:flex;align-items:center;gap:9px;paddi
 #arena{position:relative;flex:1;overflow:hidden}
 /* the floor line is a theme value, not a constant — every background sets its own */
 #stage{position:absolute;left:0;right:0;bottom:var(--stage-bottom,15%);height:0;z-index:3}
+#stage .downline{position:absolute}
 
 /* ---- cutscene: the game steps back and lets you watch the boss act ---- */
 #cinema{position:absolute;inset:0;z-index:8;opacity:0;pointer-events:none;transition:opacity .3s}
@@ -516,6 +517,25 @@ header{position:relative;z-index:5;display:flex;align-items:center;gap:9px;paddi
 /* permanently smug */
 .smirk .mouth{border-radius:0 0 24px 5px;transform:rotate(-6deg)}
 .smirk .ouch .mouth{transform:rotate(0) scaleY(2.1)}
+
+/* ---- chef's hat: puffy crown on a band, one outline over the whole thing ---- */
+.toque{position:absolute;left:-16px;right:-16px;top:-66px;height:78px;z-index:3;
+  filter:drop-shadow(3px 0 0 #241a4d) drop-shadow(-3px 0 0 #241a4d)
+         drop-shadow(0 3px 0 #241a4d) drop-shadow(0 -3px 0 #241a4d)}
+.toque i{position:absolute;border-radius:50%;background:linear-gradient(#fff,#dfe6f5)}
+.toque i:nth-child(1){left:0;top:16px;width:50px;height:48px}
+.toque i:nth-child(2){left:26%;top:0;width:60px;height:58px}
+.toque i:nth-child(3){right:0;top:13px;width:52px;height:50px}
+.toque b{position:absolute;left:8px;right:8px;bottom:0;height:22px;border-radius:5px;
+  background:linear-gradient(#f4f7ff,#ccd6ea)}
+.lips .mouth{background:#c0334f}
+/* ---- hype man's microphone ---- */
+.mic{position:absolute;left:50%;bottom:-30px;margin-left:-11px;width:22px;height:40px;
+  border-radius:11px 11px 4px 4px;background:linear-gradient(#5a6480,#2b3350);border:4px solid #241a4d}
+.mic::after{content:'';position:absolute;left:50%;top:-9px;width:24px;height:22px;margin-left:-12px;
+  border-radius:50%;background:radial-gradient(circle at 36% 30%,#c9d3e6,#7d879e);border:4px solid #241a4d}
+.sig-hype .mic{transform:rotate(-24deg) translateY(-6px)}
+.sig-chef .mouth{transform:rotate(-8deg)}
 
 /* ---- DOGECOIN: the shiba itself, not a person ---- */
 .dogeskull{position:absolute;inset:0;border-radius:48% 48% 44% 44%;border:4px solid #241a4d;
@@ -836,6 +856,24 @@ header{position:relative;z-index:5;display:flex;align-items:center;gap:9px;paddi
   border:3px solid #8a4a0d;opacity:.92;animation:stainin .35s ease-out}
 @keyframes stainin{from{transform:scale(.2) translateY(-30px);opacity:0}}
 
+/* the downline: small believers stacked in front, soaking what was meant for her */
+.downline{position:absolute;width:52px;height:64px;pointer-events:none;
+  animation:dlbob .7s infinite alternate ease-in-out}
+@keyframes dlbob{to{transform:translateY(-5px)}}
+.downline i{position:absolute;border:4px solid #241a4d}
+.downline i.h{left:11px;top:0;width:30px;height:30px;border-radius:50%;
+  background:radial-gradient(circle at 36% 30%,#f7d9bd,#e0b184)}
+.downline i.b{left:4px;top:26px;width:44px;height:38px;border-radius:18px 18px 8px 8px;
+  background:linear-gradient(#8fa4cc,#5d7099)}
+.downline.pop{animation:dlpop .3s forwards}
+@keyframes dlpop{to{transform:translateY(26px) rotate(46deg) scale(.7);opacity:0}}
+#hype{position:absolute;left:50%;top:8px;transform:translateX(-50%);z-index:6;width:162px;text-align:center;
+  font-family:system-ui;font-weight:800;font-size:9px;letter-spacing:2px;color:#241a4d;
+  background:#ffffffe6;border:3px solid #241a4d;border-radius:12px;padding:4px 8px 6px;box-shadow:0 4px 0 #241a4d44}
+#hype .bar{height:11px;margin-top:3px;border:3px solid #241a4d;border-radius:8px;background:#fff;overflow:hidden}
+#hype .bar i{display:block;height:100%;width:0;background:linear-gradient(#ffe066,#f0a70b);transition:width .1s}
+#hype.max{color:#c8641e}
+#hype.max .bar i{background:linear-gradient(#ffb36b,#e8542e)}
 #gas,#peg{position:absolute;left:50%;top:8px;transform:translateX(-50%);z-index:6;width:162px;text-align:center;
   font-family:system-ui;font-weight:800;font-size:9px;letter-spacing:2px;color:#241a4d;
   background:#ffffffe6;border:3px solid #241a4d;border-radius:12px;padding:4px 8px 6px;box-shadow:0 4px 0 #241a4d44}
@@ -976,6 +1014,7 @@ footer.locked .wp{opacity:.55}
     <div id="arena">
       <div id="gas" hidden><span>GAS</span><div class="bar"><i></i></div></div>
       <div id="peg" hidden><span>PEG</span> <b>$1.00</b><div class="bar"><i></i></div></div>
+      <div id="hype" hidden><span>HYPE</span> <b>0%</b><div class="bar"><i></i></div></div>
       <div id="combo"></div>
       <div id="purse">🪙 0</div>
       <div id="mess"></div>
@@ -1087,6 +1126,33 @@ BOSSES.push(
     lines:['It was an accounting error.','The funds are... somewhere.','We were solvent yesterday.',
            'I did not mean to.','Let me post an apology thread.'] },
 
+  /* ONECOIN — a four billion dollar Ponzi that never had a blockchain at all, only a
+     recipe and a stage presence. Her scheme is a pyramid, so the pyramid fights for her. */
+  { intro:'Her downline stacks up in front and takes the hits for her.',
+    stage:'kitchen', id:'chef', name:'THE CHEF', coin:'ONECOIN', mech:'PYRAMID', hp:1800,
+    c:'#e8546a', skin:'#f3c9a6', hair:'#241a1e', shirt:'#f2f5fb', logo:'1', iris:'#3a2418',
+    toque:1, lips:1, voice:250,
+    hw:104, hh:108, hr:'46% 46% 54% 54%', neckw:36,
+    hairh:'30px', hairr:'52% 52% 10% 10%', fringew:'62px', fringeh:'26px',
+    eyey:'44px', eyex:'17px', eyew:'25px', eyeh:'23px', browlift:'14px', broww:'27px', browh:'6px',
+    nosey:'22px', nosew:'13px', noseh:'17px', mouthb:'15px', mouthw:'32px', mouthh:'13px', chinw:'46px',
+    tw:130, th:104, armw:32, uplen:56, forelen:52, legw:34, thighlen:54, shinlen:50, legspan:94,
+    lines:['The blockchain is coming soon.','Trust the recipe.','My people believe.',
+           'Nobody has audited it.','I will be back.'] },
+
+  /* BITCONNECT — the guaranteed-returns lending scheme, remembered entirely for a man
+     screaming on a stage. Leave him alone and the crowd works him up again. */
+  { intro:'Stop hitting him and the crowd hypes him back up. Keep the pressure on.',
+    stage:'kitchen', id:'hype', name:'THE HYPE MAN', coin:'BITCONNECT', mech:'HYPE WAVE', hp:1700,
+    c:'#f5b31f', skin:'#e8b184', hair:'#20161a', shirt:'#e8542e', logo:'!', iris:'#2a1c10',
+    grin:1, suit:1, mic:1, voice:180,
+    hw:110, hh:104, hr:'48% 48% 52% 52%', neckw:42,
+    hairh:'28px', hairr:'52% 52% 8% 8%', fringew:'56px', fringeh:'22px',
+    eyey:'40px', eyex:'16px', eyew:'27px', eyeh:'26px', browlift:'16px', broww:'30px', browh:'8px',
+    nosey:'24px', nosew:'15px', noseh:'17px', mouthb:'12px', mouthw:'54px', mouthh:'26px', chinw:'50px',
+    tw:138, th:104, armw:34, uplen:56, forelen:52, legw:34, thighlen:54, shinlen:50, legspan:98,
+    lines:['WHAT IS THIS!','Hey hey HEY!','Guaranteed returns!','Bring your friends!','To the MOON!'] },
+
   // SQUID-style rug: the dev was always anonymous, so the mask IS the character.
   { intro:'When he is hurt he runs off with the bag. Do not let him reach the edge.', stage:'grocery', id:'rug', name:'THE RUG', coin:'SQUID', mech:'EXIT SCAM', hp:1600,
     c:'#ff2d78', face:'rug', logo:'🦑', shirt:'#3a1030', skin:'#e8b48c', voice:260,
@@ -1131,6 +1197,7 @@ const UI = {
   blocked:  { en:'BLOCKED', ko:'막힘' },
   combo:    { en:'COMBO x', ko:'콤보 x' },
   gas:      { en:'GAS', ko:'가스' },
+  hype:     { en:'HYPE', ko:'환호' },
   peg:      { en:'PEG', ko:'페그' },
   shop:     { en:'SHOP', ko:'상점' },
   buy:      { en:'BUY', ko:'구매' },
@@ -1156,11 +1223,16 @@ const KO = {
       lines:['페그는 유지된다.','침착. 침착.','일시적인 현상이다.','준비금을 더 넣으면 된다.','수학은 지지 않는다.'] },
     altruist: { name:'이타주의자', intro:'그가 보여주는 체력바는 믿을 게 못 된다.',
       lines:['회계 실수였다.','자금은... 어딘가에 있다.','어제까지는 멀쩡했다.','고의가 아니었다.','사과문 올리겠다.'] },
+    chef: { name:'셰프', intro:'하부 조직이 앞에 쌓여 대신 맞아준다.',
+      lines:['블록체인은 곧 나온다.','레시피를 믿어라.','내 사람들은 믿는다.','아무도 감사한 적 없다.','나는 돌아온다.'] },
+    hype: { name:'선동가', intro:'때리기를 멈추면 군중이 다시 띄워준다. 계속 몰아쳐라.',
+      lines:['이게 뭐냐고!','헤이 헤이 헤이!','수익 보장!','친구를 데려와!','문까지 간다!'] },
     rug: { name:'러그', intro:'체력이 낮아지면 가방을 들고 도망친다. 끝까지 가게 두지 마라.',
       lines:['gm.','유동성은 잠겨 있다. 믿어라.','개발자는 안 판다.','마케팅 지갑이다.','금방 돌아옴.'] },
   },
   sig: { ghost:'아직 여기 있다.', architect:'비싸군.', speedrunner:'너무 느려.', memelord:'와우.',
-    showman:'내 얼굴!', algorithm:'침착.', altruist:'어라.', rug:'내 가방!' },
+    showman:'내 얼굴!', algorithm:'침착.', altruist:'어라.', rug:'내 가방!',
+    chef:'지켜봐라.', hype:'우오오오!' },
   weapons: { candle:'레드 캔들', bat:'야구 방망이', hammer:'FUD 해머', doge:'도지 미사일',
     pizza:'피자 투척', whale:'고래 덤프' },
   pain: ['아야!', '윽!', '으악!', '그만!', '컥!', '내 코인!'],
@@ -1224,6 +1296,7 @@ const TTS = {
   speedrunner:{ p:.95, r:1.50, v:2 },  memelord:    { p:1.90, r:1.16, v:3 },
   showman:    { p:1.25, r:1.30, v:4 }, algorithm:   { p:1.00, r:.95,  v:5 },
   altruist:   { p:1.42, r:1.42, v:6 }, rug:         { p:.68,  r:.88,  v:7 },
+  chef:       { p:1.5,  r:1.0,  v:8 }, hype:        { p:1.15, r:1.35, v:9 },
 }
 const Voice = {
   ok: typeof speechSynthesis !== 'undefined', list: [],
@@ -1353,6 +1426,7 @@ function calcDamage(base, mods) {
   let d = base
   if (mods.hodl) d *= .5
   if (mods.gasMax) d *= .7
+  if (mods.hyped) d *= .55
   if (mods.crit) d *= 3
   if (mods.pegged) d *= .6
   if (mods.reboot) d *= 2
@@ -1385,9 +1459,7 @@ function stepJoint(j, dt) {
    and the reason there is no leaderboard. */
 const FREE_WEAPONS = ['candle', 'bat', 'hammer', 'pizza']
 const PRICES = { doge: 600, whale: 900 }
-// kitchen is built but withheld until its two bosses land; an empty roster is worse
-// than no stage at all
-const STAGE_PRICES = { grocery: 1200, floor: 2000 }
+const STAGE_PRICES = { grocery: 1200, kitchen: 1600, floor: 2000 }
 const Save = {
   coins: 0, owned: FREE_WEAPONS.slice(), stages: ['arena'], stage: 'arena',
   load() {
@@ -1853,6 +1925,7 @@ let propTimer = 0
 function clearProps() {
   clearTimeout(propTimer); propTimer = 0
   const p = $('#props'); if (p) p.innerHTML = ''
+  G.downline = []
 }
 function placeFixtures() {
   (theme.fixtures || []).forEach(k => {
@@ -2272,6 +2345,8 @@ const SIGNATURE = {
   algorithm:   { t:1.1, say:'Steady.',      pose:{ armL:76, armR:-76, foreL:40, foreR:-40, head:6 }, cls:'sig-shrug' },
   altruist:    { t:1.1, say:'Oops.',        pose:{ armL:92, armR:-92, foreL:30, foreR:-30, head:10 }, cls:'sig-panic' },
   rug:         { t:1.1, say:'MY BAG!',      pose:{ armL:-46, armR:46, foreL:70, foreR:-70 }, cls:'sig-hug' },
+  chef:        { t:1.2, say:'Watch me.',    pose:{ armL:58, armR:-24, foreL:34, foreR:-96, head:-8 }, cls:'sig-chef' },
+  hype:        { t:1.0, say:'WOOOO!',       pose:{ armL:104, armR:-104, foreL:40, foreR:-40, head:-12 }, hop:420, cls:'sig-hype' },
 }
 function restorePose() {
   const slack = G.over ? .18 : 1, sd = G.over ? .45 : 1
@@ -2317,7 +2392,7 @@ const BONES = [
 
 function figure(b) {
   const d = Object.assign({}, DEF, b)
-  const f = el('div', 'boss' + (b.grin ? ' grin' : '') + (b.suit ? ' suit' : '') + (b.gaunt ? ' gaunt' : '') + (b.chub ? ' chub' : '') + (b.smirk ? ' smirk' : '') + (b.bare ? ' bare' : ''))
+  const f = el('div', 'boss' + (b.grin ? ' grin' : '') + (b.suit ? ' suit' : '') + (b.gaunt ? ' gaunt' : '') + (b.chub ? ' chub' : '') + (b.smirk ? ' smirk' : '') + (b.bare ? ' bare' : '') + (b.lips ? ' lips' : ''))
   const S = (k, v) => f.style.setProperty('--' + k, typeof v === 'number' ? v + 'px' : v)
   S('c', b.c); S('skin', d.skin); S('shirt', d.shirt); S('hair', d.hair); S('iris', d.iris)
   ;['hw','hh','hr','neckw','hairh','hairr','fringew','fringeh','eyey','eyex','eyew','eyeh','browlift','broww','browh',
@@ -2357,6 +2432,7 @@ function figure(b) {
          ${b.glasses ? '<div class="glasses"><i></i><i></i></div>' : ''}
          ${b.headset ? '<div class="headset"></div>' : ''}
          ${b.crown ? '<div class="crown"><i></i><i></i><i></i><b></b><s></s></div>' : ''}
+         ${b.toque ? '<div class="toque"><i></i><i></i><i></i><b></b></div>' : ''}
        </div>`
 
   f.innerHTML = `<div class="shadow"></div>
@@ -2366,7 +2442,7 @@ function figure(b) {
         <div class="shirt"><div class="shine"></div><div class="logo">${b.logo || ''}</div><div class="hem"></div></div>
         <div class="collar"></div>
         <div class="bn arm l" data-b="armL"><div class="sleeve"></div><div class="bn fore" data-b="foreL"><div class="hand"></div></div></div>
-        <div class="bn arm r" data-b="armR"><div class="sleeve"></div><div class="bn fore" data-b="foreR"><div class="hand"></div>${b.id === 'rug' ? '<div class="bag">💰</div>' : ''}</div></div>
+        <div class="bn arm r" data-b="armR"><div class="sleeve"></div><div class="bn fore" data-b="foreR"><div class="hand"></div>${b.id === 'rug' ? '<div class="bag">💰</div>' : ''}${b.mic ? '<div class="mic"></div>' : ''}</div></div>
         ${head}
       </div>
       <div class="bn leg l" data-b="legL"><div class="bn shin" data-b="shinL"></div></div>
@@ -2446,6 +2522,7 @@ const G = {
   shield: 0, shieldMax: 180, shieldUsed: false,
   coins: [], marks: {}, nMarks: 0,
   peg: 1, spiral: false, books: false, exit: 0, exitPrep: false,
+  downline: [], hype: 0, hyped: false, lastHit: 0,
   sigT: 0, sigAt: 0, purse: 0, lock: 0, cine: false,
   drag: { on:false, id:-1, tx:0, ty:0, vx:0, vy:0, ox:0, oy:0 },
   x: 0, y: 0, vx: 0, vy: 0, prevVx: 0,
@@ -2525,6 +2602,7 @@ function start(id) {
     combo: 0, comboTier: 0, reboot: 0, rebootShown: false, talkIn: 5,
     shield: 0, shieldUsed: false, marks: {}, nMarks: 0,
     peg: 1, spiral: false, books: false, exit: 0, exitPrep: false,
+    downline: [], hype: 0, hyped: false, lastHit: 0,
     sigT: 0, sigAt: 0, purse: 0, lock: 0, cine: false,
     drag: { on:false, id:-1, tx:0, ty:0, vx:0, vy:0, ox:0, oy:0 },
     x: 0, y: 0, vx: 0, vy: 0, prevVx: 0,
@@ -2539,6 +2617,9 @@ function start(id) {
   $('#rekt').classList.remove('on')
   $('#gas').hidden = b.id !== 'architect'
   $('#peg').hidden = b.id !== 'algorithm'
+  $('#hype').hidden = b.id !== 'hype'
+  $('#hype').classList.remove('max')
+  if (b.id === 'hype') { G.lastHit = performance.now(); paintHype() }
   $('#peg').classList.remove('broke'); $('#hpbar').classList.remove('books')
   if (b.id === 'algorithm') paintPeg()
   $('#gas').classList.remove('max'); $('#gas .bar i').style.width = '0%'
@@ -2785,10 +2866,18 @@ function attack(e) {
   G.combo++; paintCombo()
   if (b.id === 'speedrunner' && !G.rebootShown && Math.random() < .04) reboot()
 
+  G.lastHit = now
+  if (b.id === 'hype') { G.hype = clamp(G.hype - 16, 0, 100); paintHype() }
   const crit = Math.random() < 1 / 12
   const dmg = calcDamage(w.dmg, { hodl: G.hodl, gasMax: G.gasMax, reboot: G.reboot > 0, crit,
-    pegged: G.peg > .5 && b.id === 'algorithm' })
+    hyped: G.hyped, pegged: G.peg > .5 && b.id === 'algorithm' })
   if (b.id === 'algorithm') { G.peg = clamp(G.peg - w.dmg * .0028, 0, 1); paintPeg() }
+  if (G.downline.length) {                        // the pyramid soaks it first
+    hitDownline(dmg)
+    spark(x, y, w.spark); dmgNum(x, y, dmg, 'blk'); Sound.play(w.sfx); shake('s')
+    strikeAim(!!w.splat); goldDrop(x, y, 1, 1)
+    return
+  }
   const res = applyDamage(G.hp, G.shield, dmg)
   G.shield = res.shield; G.hp = res.hp
 
@@ -2915,6 +3004,56 @@ function paintGas() {
 }
 /* DEATH SPIRAL — while the peg holds he soaks damage. Break it and he bleeds out
    on his own, but he keeps trying to re-peg, so you have to hold it down. */
+/* PYRAMID — her downline lines up in front and eats the damage meant for her.
+   Unlike a shield it does not block; the hits land, just on somebody else. */
+function spawnDownline() {
+  banner('PYRAMID!', '#e8546a'); Sound.play('block')
+  mechanic('PYRAMID', 'Her downline is taking the hits. Chew through them to reach her.')
+  signature(1)
+  ;[-96, 0, 96].forEach((off, i) => {
+    const d = el('div', 'downline', '<i class="h"></i><i class="b"></i>')
+    d.style.left = `calc(50% + ${off - 23}px)`
+    d.style.bottom = (i === 1 ? 44 : 0) + 'px'   // middle one climbs the pyramid
+    d.style.animationDelay = (i * .13) + 's'
+    $('#stage').appendChild(d)                    // same layer as the puppet, drawn after
+    G.downline.push({ node: d, hp: 150 })
+  })
+}
+function hitDownline(dmg) {
+  const f = G.downline[0]
+  if (!f) return false
+  f.hp -= dmg
+  if (f.hp <= 0) {
+    f.node.classList.add('pop')
+    setTimeout(() => f.node.remove(), 320)
+    G.downline.shift()
+    Sound.play('crack', 1.2)
+    if (!G.downline.length) {
+      propHit('SCHEME COLLAPSED!', '#e8546acc', { text: '#ff8ea0', shake: 'l', stop: .1, say: 'They believed!' })
+      G.hp = Math.max(0, G.hp - 140); G.vy -= 380; whip(1, 800)
+      paintHp(); paintDamageStage()
+      if (G.hp <= 0) die()
+    }
+  }
+  return true
+}
+/* HYPE WAVE — the inverse of a cooldown mechanic. Leave him alone and the crowd
+   works him up; he heals and shrugs off damage until you knock the wind out again. */
+function paintHype() {
+  const h = $('#hype')
+  h.querySelector('b').textContent = Math.round(G.hype) + '%'
+  h.querySelector('i').style.width = G.hype + '%'
+  h.classList.toggle('max', G.hyped)
+  if (G.hype >= 100 && !G.hyped) {
+    G.hyped = true
+    G.hp = Math.min(G.max, G.hp + Math.round(G.max * .07))
+    paintHp(); paintDamageStage()
+    propHit('HYPE WAVE!', '#f5b31fcc', { text: '#ffe066', shake: 'l', stop: .08, say: 'WHAT IS THIS!' })
+    mechanic('HYPE WAVE', 'The crowd got him back up — he heals and shrugs off damage. Keep hitting to break it.')
+    signature(1)
+  }
+  if (G.hype < 50 && G.hyped) { G.hyped = false; banner('CROWD SILENT', '#7ef29a') }
+}
 function paintPeg() {
   const p = $('#peg')
   p.querySelector('b').textContent = '$' + G.peg.toFixed(2)
@@ -2978,6 +3117,10 @@ function checkThresholds() {
     mechanic('ENERGY SHIELD', 'A shield is soaking every hit. Break it before you can reach him.')
   }
   if (G.boss.id === 'rug' && p <= .4 && !G.marks.exit && G.exit <= 0) { G.marks.exit = 1; startExit() }
+  if (G.boss.id === 'chef' && !G.downline.length) {
+    if (p <= .75 && !G.marks.d1) { G.marks.d1 = 1; spawnDownline() }
+    if (p <= .4 && !G.marks.d2) { G.marks.d2 = 1; spawnDownline() }
+  }
   if (G.boss.id === 'memelord' && !G.coins.length) {
     if (p <= .75 && !G.marks.s1) { G.marks.s1 = 1; mintCoins() }
     if (p <= .45 && !G.marks.s2) { G.marks.s2 = 1; mintCoins() }
@@ -3007,6 +3150,7 @@ function die() {
   }
   G.over = true
   clearCoins()
+  G.downline.forEach(f => f.node.remove()); G.downline = []
   const s = $('#shieldfx'); if (s) s.remove()
   bossEl.dataset.d = '4'
   G.vy -= 900; G.vx += rnd(-260, 260)
@@ -3127,6 +3271,10 @@ function loop(t) {
           mechanic('HODL MODE', 'He is guarding — your damage is halved until he drops it.'); signature(1) }
         else bossEl.style.filter = ''
       }
+    }
+    if (b.id === 'hype') {
+      const idle = (performance.now() - G.lastHit) / 1000
+      if (idle > .5) { G.hype = clamp(G.hype + 26 * dt, 0, 100); paintHype() }
     }
     if (b.id === 'architect' && G.gas > 0) { G.gas = clamp(G.gas - 26 * dt, 0, 100); paintGas() }
     if (b.id === 'algorithm') {
