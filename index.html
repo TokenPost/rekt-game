@@ -39,13 +39,13 @@ html[lang="ko"] #rekt .row button{font-size:16px}
   box-shadow:0 0 0 9px #ffffff55,0 10px 0 #e07a00,0 0 60px #ffcf5f;
   text-shadow:0 4px 0 #cf7500;animation:bob 3.4s ease-in-out infinite}
 @keyframes bob{50%{transform:translateY(-12px)}}
-.room .cloud{position:absolute;font-size:56px;opacity:.95;animation:drift linear infinite;will-change:transform}
+.room .cloud{position:absolute;opacity:.95;animation:drift linear infinite;will-change:transform}
 @keyframes drift{from{transform:translateX(-140px)}to{transform:translateX(560px)}}
 .room .skyline{position:absolute;left:0;right:0;bottom:31%;height:30%;display:flex;align-items:flex-end;gap:8px;padding:0 6px}
 .room .skyline i{flex:1;border-radius:6px 6px 0 0;background:#2ecc71;border:3px solid #1c2a4a;border-bottom:0;
   box-shadow:inset -7px 0 0 #00000022,inset 0 8px 0 #ffffff33}
 .room .skyline i.d{background:#ff5d6c}
-.room .floaty{position:absolute;font-size:30px;animation:float linear infinite;will-change:transform}
+.room .floaty{position:absolute;animation:float linear infinite;will-change:transform}
 @keyframes float{from{transform:translateY(40px) rotate(0)}to{transform:translateY(-460px) rotate(320deg)}}
 .room .floor{position:absolute;left:-4%;right:-4%;bottom:0;height:31%;
   background:linear-gradient(#59d26b,#2ea457 42%,#1d7b42);border-top:6px solid #1c2a4a;
@@ -1316,6 +1316,17 @@ const Save = {
 }
 Save.load()
 
+/* Test switch: open index.html#dev to unlock everything and top up coins.
+   Deliberately NOT the default — shipping every visitor a full wallet would
+   destroy the one thing the economy is being tested for, whether the prices
+   feel right. Reload without #dev and the real save is still there. */
+if (location.hash.toLowerCase().includes('dev')) {
+  Save.coins = 999999
+  Save.owned = WEAPONS.map(w => w.id)
+  Save.stages = Object.keys(THEMES)
+  Save.save()
+}
+
 function paintPurse() {
   const n = Save.coins
   const pu = $('#purse'); if (pu) pu.textContent = '🪙 ' + n
@@ -1474,9 +1485,26 @@ const ART = {
   milk: `<path d="M8 26 20 8h12l12 18v38a5 5 0 0 1-5 5H13a5 5 0 0 1-5-5Z" fill="#eef3ff"/>
     <path d="M8 34h36" stroke-width="4" opacity=".5"/>`,
   banana: `<path d="M8 12c4 30 26 46 52 44-14 10-44 4-52-14Z" fill="#f0d24a"/>`,
+  /* arena scenery — emoji rendered differently on every OS and clashed with the
+     drawn characters, so the sky is drawn too now */
+  cloud: `<path d="M22 54a18 18 0 0 1 3-35 24 24 0 0 1 45-7 20 20 0 0 1 14 42Z" fill="#fff"/>`,
+  coin2: `<circle cx="30" cy="30" r="24" fill="#f5cd55"/>
+    <circle cx="30" cy="30" r="16" fill="none" stroke-width="4" opacity=".45"/>
+    <path d="M30 16v28M24 22h10a6 6 0 0 1 0 12H24m0 0h11a6 6 0 0 1 0 12H24" stroke-width="4"/>`,
+  gem: `<path d="M8 24 22 6h28l14 18-28 34Z" fill="#7fd8f2"/>
+    <path d="M8 24h56M22 6l14 18M50 6 36 24M36 24v34" stroke-width="4" opacity=".55"/>`,
+  rocket: `<path d="M26 6c12 8 18 22 18 38l-8 12H16l-8-12C8 28 14 14 26 6Z" fill="#eef3ff"/>
+    <circle cx="26" cy="30" r="8" fill="#7fd8f2"/>
+    <path d="M16 44 4 58l12-2M36 44l12 14-12-2" fill="#e05c5c"/>
+    <path d="M20 56h12l-6 14Z" fill="#f0a73c"/>`,
+  chart: `<path d="M8 56h56" stroke-width="5"/>
+    <rect x="14" y="34" width="10" height="22" fill="#16c784"/>
+    <rect x="30" y="22" width="10" height="34" fill="#16c784"/>
+    <rect x="46" y="12" width="10" height="44" fill="#ea3943"/>`,
 }
 const artEl = (name, opts) => svgArt(ART[name + '_vb'] || VB[name], ART[name], opts)
-const VB = { cart:'0 0 148 118', fridge:'0 0 92 140', till:'0 0 118 108',
+const VB = { cloud:'0 0 92 62', coin2:'0 0 60 60', gem:'0 0 72 62', rocket:'0 0 52 72',
+  chart:'0 0 72 62', cart:'0 0 148 118', fridge:'0 0 92 140', till:'0 0 118 108',
   bottle:'0 0 44 84', can:'0 0 44 62', cereal:'0 0 50 70', jar:'0 0 50 68',
   milk:'0 0 52 72', banana:'0 0 66 62' }
 
@@ -1791,11 +1819,11 @@ function buildRoom(root, th) {
     const c = el('i'); if (i % 3 === 1) c.className = 'd'; c.style.height = h + '%'; sky.appendChild(c)
   })
   ;[[0, 12, 26], [1, 28, 34], [2, 8, 44]].forEach(([i, top, dur]) => {
-    const c = el('div', 'cloud', '☁️'); c.style.top = top + '%'
+    const c = el('div', 'cloud', artEl('cloud', { h: 52 })); c.style.top = top + '%'
     c.style.animationDuration = dur + 's'; c.style.animationDelay = (-i * 9) + 's'; root.appendChild(c)
   })
-  ;['🪙', '💎', '🚀', '🪙', '📈'].forEach((e, i) => {
-    const f = el('div', 'floaty', e)
+  ;['coin2', 'gem', 'rocket', 'coin2', 'chart'].forEach((e, i) => {
+    const f = el('div', 'floaty', artEl(e, { h: 30 }))
     f.style.left = (8 + i * 20) + '%'; f.style.bottom = '18%'
     f.style.animationDuration = (9 + i * 2.5) + 's'; f.style.animationDelay = (-i * 3) + 's'
     root.appendChild(f)
