@@ -832,6 +832,42 @@ footer.locked .wp{opacity:.55}
 .wp.on{background:linear-gradient(#fff6c9,#ffd75e)}
 .wp .cd{position:absolute;inset:auto 0 0 0;height:100%;background:#241a4dcc;transform-origin:bottom;pointer-events:none}
 
+
+/* the aimed weapon never blocked clicks (pointer-events:none) but it sat on top of
+   whatever you were trying to reach, so it got out of the way over a prop */
+#aim.away .wpn,#aim.away .swoosh{opacity:.12;transform:translate(-50%,-50%) scale(.55)}
+#aim .wpn,#aim .swoosh{transition:opacity .12s,transform .12s}
+
+/* full-screen colour wash for the big prop moments */
+#tint{position:absolute;inset:0;z-index:8;pointer-events:none;opacity:0}
+#tint.on{animation:tintflash .5s ease-out}
+@keyframes tintflash{0%{opacity:.75}100%{opacity:0}}
+
+/* ---- unlock celebration ---- */
+#unlock{position:absolute;inset:0;z-index:11;display:none;place-items:center;pointer-events:none}
+#unlock.on{display:grid}
+#unlock .rays{position:absolute;left:50%;top:50%;width:150%;aspect-ratio:1;transform:translate(-50%,-50%);
+  background:repeating-conic-gradient(from 0deg at 50% 50%,#ffe06655 0deg 7deg,transparent 7deg 20deg);
+  animation:unlockspin 3s linear,fadeout 2.2s forwards}
+@keyframes unlockspin{to{transform:translate(-50%,-50%) rotate(160deg)}}
+@keyframes fadeout{0%,70%{opacity:1}100%{opacity:0}}
+#unlock .card{position:relative;background:linear-gradient(#fff,#f0e6ff);border:5px solid #241a4d;
+  border-radius:22px;padding:20px 26px;text-align:center;box-shadow:0 10px 0 #241a4d66;
+  animation:unlockin 2.2s cubic-bezier(.2,1.7,.4,1) forwards}
+@keyframes unlockin{
+  0%{transform:scale(.3) rotate(-9deg);opacity:0}
+  14%{transform:scale(1.12) rotate(3deg);opacity:1}
+  22%{transform:scale(1) rotate(0)}
+  82%{transform:scale(1);opacity:1}
+  100%{transform:scale(.94) translateY(-16px);opacity:0}}
+#unlock .kicker{font-family:system-ui;font-weight:900;font-size:11px;letter-spacing:4px;color:#12b47a}
+#unlock .art{height:96px;display:grid;place-items:center;margin:8px 0 2px}
+#unlock .art .wpn{position:relative;left:auto;top:auto;transform:none}
+#unlock .nm{font-size:27px;letter-spacing:1px;color:#241a4d;-webkit-text-stroke:0}
+#unlock .cost{font-family:system-ui;font-weight:800;font-size:13px;color:#c0392b;margin-top:4px}
+#purse.spend{animation:spend .5s}
+@keyframes spend{25%{transform:scale(1.35);color:#ff5d6c}}
+
 /* ============ REKT ============ */
 #rekt{position:absolute;inset:0;z-index:9;display:none;place-content:center;justify-items:center;gap:3px;
   background:radial-gradient(60% 50% at 50% 42%,#ffd75eee,#ff8a00e6 40%,#c81e3af2)}
@@ -876,6 +912,8 @@ footer.locked .wp{opacity:.55}
     </div>
   </section>
 
+  <div id="unlock"><div class="rays"></div><div class="card">
+    <div class="kicker"></div><div class="art"></div><div class="nm"></div><div class="cost"></div></div></div>
   <section id="game" hidden>
     <div class="room" id="room2"></div>
     <header>
@@ -899,6 +937,7 @@ footer.locked .wp{opacity:.55}
       <div id="fx"></div>
       <div id="callout"><b></b><span></span></div>
       <div id="flash"></div>
+      <div id="tint"></div>
       <div id="cinema"><i class="bar t"></i><i class="bar b"></i><div class="veil"></div>
         <div class="card"><b class="ct"></b><span class="cs"></span></div></div>
     </div>
@@ -1342,6 +1381,35 @@ if (location.hash.toLowerCase().includes('dev')) {
   Save.save()
 }
 
+
+/* A purchase should feel like an event, not a number quietly changing. The wallet
+   counts down, the coins jangle, and the thing you bought takes over the screen. */
+function animatePurse(from, to) {
+  const pu = $('#purse'), sb = $('#shopbtn b'), bal = $('#shopbal')
+  pu.classList.add('spend'); setTimeout(() => pu.classList.remove('spend'), 520)
+  const t0 = performance.now(), dur = 620
+  const step = () => {
+    const k = Math.min(1, (performance.now() - t0) / dur)
+    const v = Math.round(from + (to - from) * (1 - Math.pow(1 - k, 3)))
+    pu.textContent = '🪙 ' + v
+    if (sb) sb.textContent = v
+    if (bal) bal.textContent = v
+    if (k < 1) requestAnimationFrame(step); else paintPurse()
+  }
+  step()
+}
+function unlockCard(kicker, name, artHtml, cost) {
+  const u = $('#unlock')
+  u.querySelector('.kicker').textContent = kicker
+  u.querySelector('.nm').textContent = name
+  u.querySelector('.art').innerHTML = artHtml || ''
+  u.querySelector('.cost').textContent = '− 🪙 ' + cost
+  u.classList.remove('on'); void u.offsetWidth; u.classList.add('on')
+  Sound.play('coins')
+  setTimeout(() => Sound.play('crack', 1.4), 180)
+  setTimeout(() => u.classList.remove('on'), 2250)
+}
+
 function paintPurse() {
   const n = Save.coins
   const pu = $('#purse'); if (pu) pu.textContent = '🪙 ' + n
@@ -1385,7 +1453,15 @@ function buildShop() {
     else {
       const b = el('button', 'buy', t('buy'))
       b.disabled = !afford
-      b.onclick = () => { if (Save.buyStage(id)) { Sound.play('coins'); applyTheme(id); paintPurse(); buildShop(); buildStages(); buildRoster() } }
+      b.onclick = () => {
+        const before = Save.coins
+        if (!Save.buyStage(id)) return
+        applyTheme(id)
+        animatePurse(before, Save.coins)
+        unlockCard(t('stages'), stageName(id),
+          `<div style="font-size:64px;line-height:1">🏬</div>`, STAGE_PRICES[id])
+        buildShop(); buildStages(); buildRoster()
+      }
       row.appendChild(b)
     }
     list.appendChild(row)
@@ -1405,7 +1481,19 @@ function buildShop() {
     else {
       const b = el('button', 'buy', t('buy'))
       b.disabled = !afford
-      b.onclick = () => { if (Save.buy(w.id)) { Sound.play('coins'); paintPurse(); buildShop(); buildWeapons() } }
+      b.onclick = () => {
+        const before = Save.coins
+        if (!Save.buy(w.id)) return
+        const spec = AIM_ART[w.id]
+        let art = ''
+        if (spec && spec !== 'pizza') {
+          const [cls, n] = spec.split(':')
+          art = `<div class="wpn ${cls}">${'<i></i>'.repeat(+n)}</div>`
+        }
+        animatePurse(before, Save.coins)
+        unlockCard(t('weapons'), wpName(w), art, PRICES[w.id])
+        buildShop(); buildWeapons()
+      }
       row.appendChild(b)
     }
     list.appendChild(row)
@@ -1614,6 +1702,34 @@ const artEl = (name, opts) => svgArt(VB[name], ART[name], opts)
    One tap arms a prop and it runs by itself for a few seconds — in a 45 second fight
    taps are a scarce resource, so anything that needs repeated tapping to stay useful
    would just be a damage loss and nobody would touch it. */
+
+/* Props share three behaviours: they clear the aimed weapon out of the way on hover,
+   they never take a tap meant for the boss, and they land with a full-screen beat so
+   the effect actually registers. */
+function makeProp(cls, inner) {
+  const p = el('div', 'prop ' + cls, inner || '')
+  p.addEventListener('pointerenter', () => $('#aim').classList.add('away'))
+  p.addEventListener('pointerleave', () => $('#aim').classList.remove('away'))
+  return p
+}
+function tintFlash(color) {
+  const t = $('#tint'); if (!t) return
+  t.style.background = `radial-gradient(60% 50% at 50% 45%, ${color}, transparent 75%)`
+  t.classList.remove('on'); void t.offsetWidth; t.classList.add('on')
+}
+/* the dramatic beat: wash, shake, freeze-frame, shout, and he yells about it */
+function propHit(label, color, opts) {
+  const o = opts || {}
+  tintFlash(color)
+  banner(label, o.text || color)
+  shake(o.shake || 'l')
+  if (o.stop) G.hitstop = Math.max(G.hitstop, o.stop)
+  if (!G.over && G.boss) {
+    Sound.play('scream', clamp(G.boss.voice / (o.pitch || 200), .5, 1.9))
+    if (o.say) bubble(o.say)
+  }
+}
+
 let propTimer = 0
 function clearProps() {
   clearTimeout(propTimer); propTimer = 0
@@ -1637,7 +1753,10 @@ function flingAt(fromX, fromY, cls, color) {
     f.remove()
     if (G.over || !bossEl) return
     spark(tx, ty, cls === 'egg' ? '🥚' : '🥒')
-    shake('s'); Sound.play('splat')
+    Sound.play('splat')
+    bits(tx, ty, 12, color)
+    propHit(cls === 'egg' ? 'SPLAT!' : 'PICKLED!', cls === 'egg' ? '#f6e6a8cc' : '#7fb765cc',
+      { text: cls === 'egg' ? '#ffe066' : '#9fe08a', shake: 'm', stop: .05, say: cls === 'egg' ? 'MY SUIT!' : 'Ugh.' })
     smearOn(tx, ty, color)
   }, 450)
 }
@@ -1674,7 +1793,7 @@ function spawnProp() {
   if (kind === 'fridge') return spawnFridge()
   if (kind === 'cart') return spawnCart()
   if (kind !== 'raincloud') return
-  const p = el('div', 'prop raincloud')
+  const p = makeProp('raincloud')
   const w = 96, dist = AR.w + w + 40
   p.style.left = (-w - 20) + 'px'
   p.style.top = rnd(AR.h * .10, AR.h * .30).toFixed(0) + 'px'
@@ -1689,7 +1808,7 @@ function spawnProp() {
 /* Open the fridge and a blast of cold hits whatever is in front of it. No damage —
    he just goes pale and stiff for a few seconds, which is funnier than a number. */
 function spawnFridge() {
-  const p = el('div', 'prop p-fridge', artEl('fridge', { h: 118 }))
+  const p = makeProp('p-fridge', artEl('fridge', { h: 118 }))
   const x = rnd(8, 60)
   p.style.left = x.toFixed(0) + 'px'
   p.style.top = (AR.ground - 118).toFixed(0) + 'px'
@@ -1712,7 +1831,14 @@ function spawnFridge() {
     }
     if (Math.abs(bossCX() - (x + 40)) < 250) {
       bossEl.classList.add('frozen')
-      setTimeout(() => bossEl && bossEl.classList.remove('frozen'), 3200)
+      propHit('FROZEN!', '#9fdcffdd', { text: '#bfe6ff', shake: 'l', stop: .1, pitch: 150, say: 'S-so cold...' })
+      flash()
+      for (const j of skel) j.k = j.base * 3.2            // stiff as a board
+      setTimeout(() => {
+        if (!bossEl) return
+        bossEl.classList.remove('frozen')
+        if (!G.over) restorePose()
+      }, 3200)
     }
     if (left <= 0) { p.classList.add('spent'); setTimeout(() => p.remove(), 2600) }
   })
@@ -1721,7 +1847,7 @@ function spawnFridge() {
 }
 /* Shove the cart and it rolls into him. Pure knockback, no damage. */
 function spawnCart() {
-  const p = el('div', 'prop p-cart', artEl('cart', { h: 86 }))
+  const p = makeProp('p-cart', artEl('cart', { h: 86 }))
   const fromLeft = false                       // the fridge owns the left wall
   const x = AR.w - rnd(132, 170)          // the gap between him and the checkout
   p.style.left = x.toFixed(0) + 'px'
@@ -1739,9 +1865,10 @@ function spawnCart() {
     Sound.play('thud', 1.2)
     setTimeout(() => {
       if (!G.over && bossEl) {
-        G.vx += dir * 620; G.vy -= 280
-        whip(-dir, 700); shake('m'); Sound.play('crack', .85)
-        Sound.play('scream', clamp(G.boss.voice / 200, .55, 1.9))
+        G.vx += dir * 780; G.vy -= 340
+        whip(-dir, 1000); Sound.play('crack', .85)
+        bits(bossCX(), bossCY(), 14, '#ff9f43')
+        propHit('RUN OVER!', '#ff9f43cc', { text: '#ffd06a', shake: 'l', stop: .11, say: 'AAGH!' })
       }
       p.classList.add('spent'); setTimeout(() => p.remove(), 700)
     }, 460)
@@ -1750,7 +1877,7 @@ function spawnCart() {
   setTimeout(() => { if (p.isConnected && !used) p.remove() }, 24000)
 }
 function spawnScreen() {
-  const p = el('div', 'prop screen', '<i style="height:30%"></i><i style="height:62%"></i><i style="height:44%"></i><i style="height:78%"></i>')
+  const p = makeProp('screen', '<i style="height:30%"></i><i style="height:62%"></i><i style="height:44%"></i><i style="height:78%"></i>')
   const x = rnd(30, AR.w - 120)
   p.style.left = x.toFixed(0) + 'px'
   p.style.top = (AR.h * .12).toFixed(0) + 'px'
@@ -1779,13 +1906,15 @@ function dropCandle() {
   setTimeout(() => {
     c.remove()
     if (G.over || !bossEl) return
-    shake('m'); dust(bossCX(), AR.ground + 4)
-    whip(Math.random() < .5 ? 1 : -1, 420)
-    for (const j of skel) j.v += rnd(-90, 90)
+    dust(bossCX(), AR.ground + 4)
+    whip(Math.random() < .5 ? 1 : -1, 700)
+    for (const j of skel) j.v += rnd(-140, 140)
+    bits(bossCX(), bossCY(), 12, '#ea3943')
+    propHit('MARGIN CALL!', '#ea3943cc', { text: '#ff8e8e', shake: 'l', stop: .09, say: 'Not again.' })
   }, 500)
 }
 function spawnShelfProp(kind) {
-  const p = el('div', 'prop ' + kind, '<b></b><b></b><b></b>')
+  const p = makeProp(kind, '<b></b><b></b><b></b>')
   // shelf surfaces sit at 32% and 54%; park the stock on one of them, not mid-air
   const h = kind === 'eggbox' ? 40 : 74
   const x = rnd(40, AR.w - 110)
@@ -1825,6 +1954,9 @@ function burstRain(cloud) {
     if (G.over || !cloud.isConnected) return stop()
     const cx = cloud.getBoundingClientRect().left - AR.left + 48
     if (Math.abs(cx - bossCX()) < 95) {
+      if (!bossEl.classList.contains('wet')) {
+        propHit('SOAKED!', '#3f7fd6cc', { text: '#7fc4ff', shake: 'm', say: 'Cold!' })
+      }
       bossEl.classList.add('wet')
       if (ticks % 3 === 0) puddle(bossCX() + rnd(-40, 40))
     }
